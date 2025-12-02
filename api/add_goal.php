@@ -12,7 +12,7 @@ if (empty($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $title = $_POST['title'] ?? '';
 // 1. Lấy thêm topic_id từ dữ liệu gửi lên
-$topic_id = $_POST['topic_id'] ?? null;
+$topic_name = $_POST['topic_name'] ?? '';
 
 if (trim($title) === '') {
     echo json_encode(['status'=>'error','message'=>'Title required']);
@@ -20,6 +20,8 @@ if (trim($title) === '') {
 }
 
 $model = new JournalModel();
+
+$topic_id = $model->getOrCreateTopic($user_id, $topic_name);
 
 // 2. Truyền đủ 3 tham số vào hàm (user_id, title, topic_id)
 $model->addGoal($user_id, $title, $topic_id);
