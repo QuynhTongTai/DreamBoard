@@ -226,8 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.appendChild(el);
     }
 
-    // 6. LƯU BOARD
+    // 6. LƯU BOARD (Đã nâng cấp: Lưu kèm ảnh Preview cho Journal)
     document.getElementById('saveBtn').addEventListener('click', () => {
+        
+        // --- BƯỚC 1: Gom dữ liệu JSON (Giữ nguyên logic cũ của bạn) ---
         const items = [];
 
         if (currentLayout !== 'free') {
@@ -248,18 +250,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.board-item').forEach(el => {
             let type = 'sticker';
-            let content = el.innerHTML; // Lấy HTML thay vì innerText để giữ thẻ <i> hoặc <img>
+            let content = el.innerHTML;
 
             if (el.classList.contains('item-text')) {
-                // Nếu là text thì phải xác định loại text
                 if (el.classList.contains('item-text_heading')) type = 'text_heading';
                 else if (el.classList.contains('item-text_body')) type = 'text_body';
                 else if (el.classList.contains('item-text_quote')) type = 'text_quote';
                 else if (el.classList.contains('item-text_note')) type = 'text_note';
                 else if (el.classList.contains('item-text_neon')) type = 'text_neon';
                 else type = 'text';
-
-                content = el.innerText; // Text thì chỉ lấy nội dung chữ
+                content = el.innerText;
             }
 
             items.push({
@@ -271,15 +271,46 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        fetch('api/save_vision.php', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: items })
-        }).then(res => res.json()).then(d => {
-            if (d.status === 'success') alert('Saved! 💾');
-            else alert('Error saving');
+        // --- BƯỚC 2: CHỤP ẢNH CANVAS VÀ GỬI CÙNG JSON (PHẦN MỚI) ---
+        
+        // Hiệu ứng nút bấm đang xử lý
+        const saveBtn = document.getElementById('saveBtn');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Saving...';
+        saveBtn.disabled = true;
+
+        const board = document.getElementById('canvas');
+
+        // Dùng html2canvas chụp lại bảng hiện tại
+        html2canvas(board, { scale: 1, useCORS: true }).then(canvas => {
+            // Chuyển canvas thành chuỗi ảnh Base64
+            const base64Image = canvas.toDataURL('image/png'); 
+
+            // Gửi cả items (JSON) và preview_image (Base64) lên server
+            fetch('api/save_vision.php', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    items: items,
+                    preview_image: base64Image // <--- Gửi kèm ảnh tại đây
+                })
+            })
+            .then(res => res.json())
+            .then(d => {
+                if (d.status === 'success') alert('Saved successfully! 💾');
+                else alert('Error saving: ' + d.message);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error saving board connection.");
+            })
+            .finally(() => {
+                // Trả lại trạng thái nút bấm ban đầu
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
         });
     });
-
     document.getElementById('clearBtn').addEventListener('click', () => {
         if (confirm('Clear all?')) {
             window.applyLayout('free', false);

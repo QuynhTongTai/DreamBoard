@@ -78,10 +78,18 @@
           &rarr;</a>
       </div>
 
-      <div class="canvas-preview-wrapper">
-        <div id="miniCanvas" class="vision-board-canvas scaled-canvas">
-          <div class="loading-canvas">Loading your vision...</div>
-        </div>
+      <div class="canvas-preview-wrapper" style="text-align: center; padding: 10px 0;">
+        <?php if ($visionPreviewSrc): ?>
+          <img src="<?php echo $visionPreviewSrc; ?>" alt="My Vision Board"
+            style="width: 100%; max-width: 550px; height: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+        <?php else: ?>
+          <div
+            style="height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#999; background:#f9f9fc; border-radius:12px; max-width: 600px; margin: 0 auto;">
+            <p style="margin-bottom:8px; font-size:14px;">No vision board yet</p>
+            <a href="vision.php" class="btn-view-all" style="background:#fff; font-size:12px; padding: 6px 14px;">Create
+              now</a>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
     <h4 class="section-title">Journey Timeline</h4>
@@ -216,24 +224,18 @@
 
       <label style="display:block; margin-bottom:8px; font-weight:500;">Topic</label>
       <div class="topic-select-wrapper" style="position:relative;">
-        <select id="goalTopic"
-          style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; appearance:none; background:white;">
-          <option value="">Select a topic...</option>
-
+        
+        <input type="text" id="goalTopicName" list="topicSuggestions" placeholder="Select or type new topic..."
+               style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        
+        <datalist id="topicSuggestions">
           <?php if (!empty($topics)): ?>
             <?php foreach ($topics as $t): ?>
-              <option value="<?php echo $t['topic_id']; ?>">
-                <?php echo htmlspecialchars($t['name']); ?>
-              </option>
+              <option value="<?php echo htmlspecialchars($t['name']); ?>"></option>
             <?php endforeach; ?>
           <?php endif; ?>
-        </select>
-        <svg
-          style="position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; color:#666;"
-          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        </datalist>
+
       </div>
 
       <div class="modal-actions" style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">

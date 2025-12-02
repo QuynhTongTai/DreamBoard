@@ -88,17 +88,50 @@ class JournalModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    // --- HÀM MỚI: TÌM HOẶC TẠO TOPIC ---
+    public function getOrCreateTopic($user_id, $topic_name) {
+        $topic_name = trim($topic_name);
+        if (empty($topic_name)) return null;
+
+        // 1. Kiểm tra xem topic đã tồn tại chưa
+        $queryCheck = "SELECT topic_id FROM topics WHERE user_id = :uid AND name = :name LIMIT 1";
+        $stmt = $this->conn->prepare($queryCheck);
+        $stmt->execute([':uid' => $user_id, ':name' => $topic_name]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            return $row['topic_id']; // Đã có -> Trả về ID cũ
+        }
+
+        // 2. Nếu chưa có -> Tạo mới
+        // Random màu pastel xinh xinh cho topic mới
+        $colors = ['#FFD8C3', '#C6A7FF', '#B7E3D0', '#FFCCA7', '#ACE7FF', '#FFABAB'];
+        $randomColor = $colors[array_rand($colors)];
+
+        $queryInsert = "INSERT INTO topics (user_id, name, color) VALUES (:uid, :name, :color)";
+        $stmtIn = $this->conn->prepare($queryInsert);
+        $stmtIn->execute([
+            ':uid' => $user_id, 
+            ':name' => $topic_name, 
+            ':color' => $randomColor
+        ]);
+
+        return $this->conn->lastInsertId(); // Trả về ID vừa tạo
+    }
+    // File: app/models/JournalModel.php
+
+    // Hàm này chỉ làm nhiệm vụ lưu vào Database
     public function addGoal($user_id, $title, $topic_id) {
         $query = "INSERT INTO goals (user_id, title, topic_id, progress, created_at) 
                   VALUES (:uid, :title, :topic_id, 0, NOW())";
+        
         $stmt = $this->conn->prepare($query);
         
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
         
-        // Nếu topic_id rỗng hoặc 'all', ta lưu là NULL
+        // Xử lý nếu topic_id là null (topic chung)
         if (empty($topic_id) || $topic_id === 'all') {
-            $topic_id = null; 
             $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindParam(':topic_id', $topic_id);

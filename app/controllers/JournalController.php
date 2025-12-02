@@ -8,8 +8,7 @@ class JournalController
 {
     public function show()
     {
-        if (session_status() == PHP_SESSION_NONE)
-            session_start();
+        if (session_status() == PHP_SESSION_NONE) session_start();
 
         if (empty($_SESSION['user_id'])) {
             header('Location: login.php');
@@ -19,25 +18,46 @@ class JournalController
         $user_id = $_SESSION['user_id'];
 
         $model = new JournalModel();
+        
+        // 1. Lấy dữ liệu Goals & Logs
         $topics = $model->getTopics($user_id);
         $goals = $model->getGoalsByUser($user_id);
         $logs = $model->getLogsByUserId($user_id);
 
-        // lấy thông tin user (có thể từ session, hoặc đọc lại từ DB nếu cần)
-        // nếu bạn muốn lấy từ DB: tạo DB class hoặc users model (bên dưới minh họa getUserById nhanh)
+        // 2. Lấy thông tin Profile & Stats
         $profile = $this->getUserProfile($user_id);
         $activityStats = $model->getLast7DaysStats($user_id);
-        // đưa dữ liệu vào view bằng biến toàn cục (đơn giản)
+
+        // --- 3. LOGIC MỚI: KIỂM TRA ẢNH PREVIEW VISION BOARD ---
+        
+        // Đường dẫn file hệ thống (để kiểm tra file_exists)
+        // __DIR__ là thư mục app/controllers, cần đi lùi 2 cấp (../../) để ra root
+        $previewDirRelative = "/../../assets/uploads/vision_previews/";
+        $previewPathSystem = __DIR__ . $previewDirRelative . "vision_user_" . $user_id . ".png";
+        
+        // Đường dẫn URL (để hiển thị trên thẻ img src)
+        $visionPreviewSrc = "assets/uploads/vision_previews/vision_user_" . $user_id . ".png";
+        
+        // Kiểm tra xem file có thật sự tồn tại không
+        if (file_exists($previewPathSystem)) {
+            // Thêm tham số time() để tránh cache (giúp ảnh cập nhật ngay khi vừa Save bên kia)
+            $visionPreviewSrc .= "?v=" . time();
+        } else {
+            // Nếu chưa có ảnh thì gán null
+            $visionPreviewSrc = null; 
+        }
+        // -------------------------------------------------------
+
+        // 4. Render View
         include __DIR__ . '/../views/layouts/head.php';
         echo '<link rel="stylesheet" href="assets/css/journal.css">';
         include __DIR__ . '/../views/layouts/topbar.php';
 
-        // make $goals, $logs, $profile available in view
+        // Biến $visionPreviewSrc sẽ được dùng bên trong journal_view.php
         include __DIR__ . '/../views/journal_view.php';
+        
         echo '<script src="assets/js/journal.js"></script>';
-
         include __DIR__ . '/../views/layouts/footer.php';
-
     }
 
     private function getUserProfile($user_id)
@@ -50,10 +70,12 @@ class JournalController
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+    // File: app/controllers/JournalController.php
+
     public function addGoal()
     {
-        if (session_status() == PHP_SESSION_NONE)
-            session_start();
+        // 1. Kiểm tra đăng nhập
+        if (session_status() == PHP_SESSION_NONE) session_start();
         if (empty($_SESSION['user_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             return;
@@ -61,14 +83,23 @@ class JournalController
 
         $user_id = $_SESSION['user_id'];
         $title = $_POST['title'] ?? '';
-        $topic_id = $_POST['topic_id'] ?? null;
+        
+        // 2. Nhận TÊN topic từ input text (không phải ID)
+        $topic_name = $_POST['topic_name'] ?? ''; 
+
         if (trim($title) === '') {
             echo json_encode(['status' => 'error', 'message' => 'Title required']);
             return;
         }
 
         $model = new JournalModel();
-        $model->addGoal($_SESSION['user_id'], $title, $topic_id);
+
+        // 3. LOGIC QUAN TRỌNG:
+        // Từ cái tên topic người dùng nhập -> Tìm ID cũ hoặc Tạo mới lấy ID
+        $topic_id = $model->getOrCreateTopic($user_id, $topic_name);
+
+        // 4. Gọi hàm Model để lưu Goal với cái ID vừa tìm được
+        $model->addGoal($user_id, $title, $topic_id);
 
         echo json_encode(['status' => 'success']);
     }

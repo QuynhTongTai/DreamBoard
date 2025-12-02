@@ -71,20 +71,23 @@ function closeModal() {
 
 function saveGoal() {
     const title = document.getElementById('goalTitle').value.trim();
-    const topicId = document.getElementById('goalTopic') ? document.getElementById('goalTopic').value : '';
+    
+    // SỬA: Lấy value từ input text chứ không phải select
+    const topicName = document.getElementById('goalTopicName').value.trim(); 
 
     if (!title) return alert("Please enter a goal title!");
 
     fetch("api/add_goal.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `title=${encodeURIComponent(title)}&topic_id=${topicId}`
+        // SỬA: Gửi param là 'topic_name'
+        body: `title=${encodeURIComponent(title)}&topic_name=${encodeURIComponent(topicName)}`
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
             closeModal();
-            location.reload();
+            location.reload(); // Reload để thấy topic mới và goal mới
         } else {
             alert(data.message || "Error!");
         }

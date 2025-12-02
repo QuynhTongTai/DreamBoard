@@ -36,6 +36,7 @@ class VisionController {
     }
 
     // API Lưu dữ liệu
+    // API Lưu dữ liệu
     public function saveBoardData() {
         header('Content-Type: application/json');
         if (session_status() == PHP_SESSION_NONE) session_start();
@@ -44,20 +45,36 @@ class VisionController {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
 
-        // SỬA Ở ĐÂY: Chỉ kiểm tra user_id và sự tồn tại của key 'items'
-        // Cho phép $data['items'] là mảng rỗng []
         if (!$user_id || !isset($data['items'])) {
             echo json_encode(['status' => 'error', 'message' => 'Invalid data']); 
             exit;
         }
+
+        // --- XỬ LÝ LƯU ẢNH PREVIEW (MỚI) ---
+        if (isset($data['preview_image'])) {
+            // Tách phần header "data:image/png;base64," ra khỏi chuỗi
+            $imgParts = explode(',', $data['preview_image']);
+            if (count($imgParts) == 2) {
+                $base64 = $imgParts[1];
+                $decoded = base64_decode($base64);
+                
+                // Tạo thư mục nếu chưa có
+                $previewDir = __DIR__ . "/../../assets/uploads/vision_previews/";
+                if (!file_exists($previewDir)) mkdir($previewDir, 0777, true);
+                
+                // Lưu file với tên cố định theo ID user: vision_user_1.png
+                // (Ghi đè mỗi khi lưu mới để tiết kiệm dung lượng)
+                $filePath = $previewDir . "vision_user_" . $user_id . ".png";
+                file_put_contents($filePath, $decoded);
+            }
+        }
+        // ------------------------------------
 
         $boardModel = new VisionBoardModel();
         $itemModel = new VisionItemModel();
 
         try {
             $board_id = $boardModel->getOrCreateBoard($user_id);
-            
-            // Xóa cũ -> Thêm mới
             $itemModel->clearBoard($board_id);
             foreach ($data['items'] as $item) {
                 $itemModel->addItem($board_id, $item);
@@ -70,7 +87,6 @@ class VisionController {
         }
         exit;
     }
-
     // API Upload ảnh riêng cho Vision
     public function uploadImage() {
         header('Content-Type: application/json');
