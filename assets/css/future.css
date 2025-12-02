@@ -1,0 +1,252 @@
+/* assets/css/future.css */
+
+/* Reset & Font */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Pacifico&display=swap');
+
+:root {
+    --bg-gradient: radial-gradient(circle at 10% 10%, #e6e6fa 0%, #fff0f5 40%, #e0ffff 80%);
+    --card-bg: #ffffff;
+    --primary-purple: #8a6dc5;  /* Màu tím chủ đạo trong ảnh */
+    --primary-teal: #56cfa8;    /* Màu xanh ngọc của tiêu đề Moods */
+    --text-dark: #4a4a4a;
+    --text-light: #888;
+    --shadow-soft: 0 15px 40px rgba(138, 109, 197, 0.15);
+    --radius-card: 24px;
+    --radius-input: 12px;
+}
+
+body {
+    background: url('../images/galaxy1.jpg') no-repeat center center fixed; /* Thay bằng ảnh nền galaxy của bạn */
+    background-size: cover;
+    font-family: 'Quicksand', sans-serif; /* Font tròn trịa giống ảnh */
+    color: var(--text-dark);
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* Overlay mờ để chữ dễ đọc hơn trên nền ảnh */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.4); /* Lớp phủ trắng mờ 40% */
+    z-index: -1;
+    backdrop-filter: blur(5px); /* Làm mờ ảnh nền chút xíu cho ảo */
+}
+
+/* Layout 2 Cột */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr; /* Cột trái rộng hơn xíu */
+    gap: 40px;
+    align-items: stretch;
+}
+
+/* Style chung cho Card */
+.card {
+    background: rgba(255, 255, 255, 0.95); /* Trắng đục */
+    padding: 35px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    border: 2px solid #fff; /* Viền trắng phát sáng */
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- CỘT TRÁI: FORM --- */
+.capsule-title {
+    font-family: 'Pacifico', cursive; /* Font viết tay bay bổng */
+    font-size: 28px;
+    color: var(--primary-purple);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.capsule-title i { font-size: 24px; }
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* Input & Textarea giống ảnh: Nền xám nhạt, bo tròn */
+input[type="text"], 
+input[type="date"], 
+input[type="time"], 
+textarea {
+    width: 100%;
+    background: #f3f4f8; /* Màu xám nhạt */
+    border: none;
+    padding: 15px;
+    border-radius: var(--radius-input);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: 0.2s;
+}
+input::placeholder, textarea::placeholder {
+    color: #b0b0c0;
+    font-weight: 500;
+}
+input:focus, textarea:focus {
+    background: #fff;
+    box-shadow: 0 0 0 2px #dcd6ff; /* Viền tím nhạt khi focus */
+    outline: none;
+}
+
+textarea {
+    min-height: 120px;
+    resize: none;
+}
+
+/* Date/Time Row */
+.date-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Nút Seal & Send màu tím */
+.seal-btn {
+    background: var(--primary-purple);
+    color: white;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 50px; /* Nút tròn 2 đầu */
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.seal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(138, 109, 197, 0.4);
+}
+
+/* --- CỘT PHẢI: MOODS --- */
+.moods-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 26px;
+    color: var(--primary-teal); /* Màu xanh ngọc */
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Lưới Icon tròn */
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px 10px;
+    justify-items: center;
+}
+
+.mood-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Vòng tròn Icon */
+.mood-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px; /* Kích thước icon */
+    background: #f0f0f0; /* Màu nền mặc định */
+    color: #fff;
+    transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.mood-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #aaa;
+    transition: 0.2s;
+}
+
+/* Màu sắc riêng cho từng Mood (Giống ảnh) */
+/* Happy - Tím nhạt */
+.mood-item[data-mood="happy"] .mood-circle { background: #d4c4fb; color: #8a6dc5; }
+/* Calm - Xanh lơ */
+.mood-item[data-mood="calm"] .mood-circle { background: #cceeff; color: #5cbbf3; }
+/* Motivated - Xanh ngọc đậm */
+.mood-item[data-mood="motivated"] .mood-circle { background: #98e6d0; color: #2b7a67; }
+/* Sad - Hồng nhạt */
+.mood-item[data-mood="sad"] .mood-circle { background: #fbd0e4; color: #e86a9e; }
+/* Excited - Vàng */
+.mood-item[data-mood="excited"] .mood-circle { background: #fff6b0; color: #e6b32e; }
+/* Anxious - Cam nhạt */
+.mood-item[data-mood="anxious"] .mood-circle { background: #ffe4c4; color: #ff9f43; }
+
+/* Hiệu ứng Hover & Active */
+.mood-item:hover { transform: scale(1.1); }
+.mood-item.active .mood-circle {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.5), 0 8px 20px rgba(0,0,0,0.15);
+}
+.mood-item.active .mood-name { color: var(--primary-purple); }
+
+/* Text hướng dẫn bên dưới */
+.mood-footer-text {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-top: 25px;
+    line-height: 1.6;
+}
+.mood-footer-text a {
+    color: var(--primary-purple);
+    text-decoration: none;
+    font-weight: 700;
+    border-bottom: 2px solid #dcd6ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container { grid-template-columns: 1fr; }
+    .mood-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* SỬA DÒNG NÀY: Tăng gap dọc lên 25px hoặc 30px */
+    gap: 30px 15px; 
+    justify-items: center;
+}
+
+/* 2. Làm icon to hơn một chút */
+.mood-circle {
+    /* SỬA DÒNG NÀY: Tăng từ 60px lên 70px */
+    width: 70px;
+    height: 70px;
+    
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* SỬA DÒNG NÀY: Tăng icon bên trong lên 32px */
+    font-size: 32px; 
+    
+    background: #f0f0f0;
+    color: #fff;
+    transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}

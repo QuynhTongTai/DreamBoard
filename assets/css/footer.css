@@ -1,0 +1,54 @@
+/* --- FOOTER (Đơn giản & Tím nhạt) --- */
+footer {
+  margin-top: 60px; /* Tăng khoảng cách phía trên một chút */
+  padding: 40px 20px;
+  text-align: center;
+  /* Nền màu tím nhạt pastel */
+  background-color: #f3e8ff; 
+  /* Màu chữ tím đậm hơn cho dễ đọc */
+  color: #6b21a8; 
+  border-top: none; /* Bỏ viền trên nếu muốn liền mạch hơn */
+}
+
+.footer-inner {
+  max-width: 800px; /* Giới hạn chiều rộng để nội dung không bị bè ra */
+  margin: 0 auto;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Khoảng cách giữa các dòng */
+  align-items: center;
+}
+
+.footer-slogan {
+  font-family: 'Playfair Display', serif; /* Dùng font chữ đẹp cho slogan */
+  font-size: 20px;
+  font-weight: 600;
+  color: #581c87; /* Màu tím đậm hơn cho slogan */
+  margin-bottom: 5px;
+}
+
+.small-note {
+  font-size: 14px;
+  /* Màu chữ nhạt hơn cho thông tin phụ */
+  color: #7e22ce; 
+  line-height: 1.6;
+}
+
+.small-note strong {
+  font-weight: 600;
+}
+
+.small-note a {
+  color: #6b21a8; /* Màu link */
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor; /* Gạch chân nhẹ cho link */
+  transition: all 0.2s;
+}
+
+.small-note a:hover {
+  color: #4c1d95; /* Màu khi hover */
+  border-bottom-style: solid;
+}

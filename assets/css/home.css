@@ -1,0 +1,293 @@
+/* assets/css/home.css */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap');
+
+:root {
+  --purple-soft: #a78bfa;
+  --purple-deep: #7c3aed;
+  --pink-soft: #f472b6;
+  --green-soft: #34d399;
+  --bg-gradient: linear-gradient(180deg, #fff 0%, #fbf7ff 100%);
+  --card-shadow: 0 10px 30px rgba(167, 139, 250, 0.1);
+}
+
+body {
+  /* Thêm lớp phủ màu trắng mờ (rgba) đè lên ảnh */
+  /* 0.6 là độ mờ (từ 0 đến 1). Số càng lớn thì càng trắng/mờ */
+  background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+              url('../images/galaxy.jpg') no-repeat center center fixed;
+  
+  background-size: cover;
+  font-family: 'Quicksand', sans-serif;
+  color: #444;
+}
+
+/* 1. HERO SECTION */
+.hero-section {
+  padding: 40px 20px; /* Giảm padding trên dưới từ 60px -> 40px */
+  max-width: 1000px;   /* Giảm chiều rộng tối đa từ 1200px -> 1000px */
+  margin: 20px auto 0; /* Căn giữa */
+  background: white;
+  border-radius: 24px; /* Bo góc nhỏ hơn xíu */
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  /* Nếu bạn muốn ảnh nền galaxy cho cả hộp này */
+  /* background-image: url('../images/galaxy-bg.jpg'); */
+  background-size: cover;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr; /* Điều chỉnh tỉ lệ cột để ảnh nhỏ hơn */
+  align-items: center;
+  gap: 30px; /* Giảm khoảng cách giữa 2 cột */
+  background: rgba(255, 255, 255, 0.9);
+  /* Lớp mờ đè lên nền */
+  padding: 30px; /* Giảm padding nội dung */
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  line-height: 1.2;
+  color: #2e1065;
+  margin-bottom: 20px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 30px;
+  max-width: 450px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.hero-img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transform: rotate(2deg);
+  /* Nghiêng nhẹ cho nghệ */
+  border: 5px solid #fff;
+}
+
+/* Nút bấm to đẹp */
+.btn-primary-lg {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--purple-soft), var(--purple-deep));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.btn-primary-lg:hover {
+  transform: translateY(-3px);
+}
+
+.btn-outline-lg {
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--purple-deep);
+  border: 2px solid var(--purple-deep);
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-outline-lg:hover {
+  background: #f5f3ff;
+}
+
+
+/* 2. FEATURES SECTION */
+.features-section {
+  max-width: 1100px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+.section-heading h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.section-heading p {
+  color: #888;
+  margin-bottom: 40px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.feature-card {
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(167, 139, 250, 0.2);
+  border-color: var(--purple-soft);
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.icon-purple {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.icon-green {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.icon-pink {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.feature-card h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.card-link {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--purple-deep);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+/* 3. HOW IT WORKS */
+.how-it-works-section {
+  background: #fff;
+  padding: 60px 20px;
+  margin-top: 60px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.how-container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.script-font {
+  font-family: 'Pacifico', cursive;
+  font-size: 36px;
+  color: var(--purple-soft);
+  margin-bottom: 40px;
+}
+
+.steps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 50px;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+}
+
+.step-num {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  background: var(--purple-deep);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #eee;
+  margin-top: 20px;
+  /* Căn giữa với số */
+}
+
+.final-cta p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 15px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .step-line {
+    display: none;
+  }
+}
