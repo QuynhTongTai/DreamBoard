@@ -9,15 +9,6 @@
 
     <div class="tools-grid">
       
-      <label class="tool-item" title="Upload Image">
-        <div class="icon-box bg-blue"><i class="ph-fill ph-image"></i></div>
-        <div class="tool-text">
-            <span>Photo</span>
-            <small>Upload free</small>
-        </div>
-        <input id="fileInput" type="file" accept="image/*" style="display:none">
-      </label>
-
       <div class="tool-item" id="btnFrames" onclick="toggleFramePanel()">
         <div class="icon-box bg-purple"><i class="ph-fill ph-squares-four"></i></div>
         <div class="tool-text">
@@ -36,15 +27,9 @@
           <div class="layout-option" onclick="applyLayout('hero-center')">
               <div class="mini-icon hero"></div> <span>Focus</span>
           </div>
-          <div class="layout-option" onclick="applyLayout('film-strip')">
-              <div class="mini-icon film"></div> <span>Film</span>
-          </div>
-          <div class="layout-reset" onclick="applyLayout('free')">
-              <i class="ph-bold ph-arrow-u-up-left"></i> Reset to Free
-          </div>
       </div>
 
-      <div class="tool-item" id="btnAddText">
+      <div class="tool-item" id="btnAddText" onclick="toggleTextPanel()">
         <div class="icon-box bg-pink"><i class="ph-fill ph-text-t"></i></div>
         <div class="tool-text">
             <span>Text</span>
@@ -52,7 +37,25 @@
         </div>
       </div>
 
-      <div class="tool-item" id="btnStickers">
+      <div id="textSelectionPanel" class="hidden tool-submenu">
+          <div class="layout-option" onclick="addText('text_heading')">
+              <i class="ph-bold ph-text-h-one" style="color:#6c5ce7"></i> <span>Heading</span>
+          </div>
+          <div class="layout-option" onclick="addText('text_body')">
+              <i class="ph-bold ph-text-align-left" style="color:#636e72"></i> <span>Paragraph</span>
+          </div>
+          <div class="layout-option" onclick="addText('text_quote')">
+              <i class="ph-bold ph-quotes" style="color:#fdcb6e"></i> <span>Quote Card</span>
+          </div>
+          <div class="layout-option" onclick="addText('text_note')">
+              <i class="ph-fill ph-sticky-note" style="color:#ffeaa7; text-shadow:0 1px 2px #aaa"></i> <span>Sticky Note</span>
+          </div>
+          <div class="layout-option" onclick="addText('text_neon')">
+              <i class="ph-fill ph-lightning" style="color:#ff00de"></i> <span>Neon Style</span>
+          </div>
+      </div>
+
+      <div class="tool-item" id="btnStickers" onclick="toggleStickerPanel()">
         <div class="icon-box bg-yellow"><i class="ph-fill ph-star"></i></div>
         <div class="tool-text">
             <span>Sticker</span>
@@ -60,17 +63,50 @@
         </div>
       </div>
 
+      <div id="stickerSelectionPanel" class="hidden tool-submenu sticker-library">
+          
+          <p class="library-cat">Targets</p>
+          <div class="sticker-grid">
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-airplane-tilt\'></i>')">
+                  <i class="ph-fill ph-airplane-tilt"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-currency-dollar\'></i>')">
+                  <i class="ph-fill ph-currency-dollar"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-graduation-cap\'></i>')">
+                  <i class="ph-fill ph-graduation-cap"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-house-line\'></i>')">
+                  <i class="ph-fill ph-house-line"></i>
+              </div>
+          </div>
+
+          <p class="library-cat">Decor</p>
+          <div class="sticker-grid">
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-sparkle\'></i>')">
+                  <i class="ph-fill ph-sparkle"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-heart\'></i>')">
+                  <i class="ph-fill ph-heart"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-push-pin\'></i>')">
+                  <i class="ph-fill ph-push-pin"></i>
+              </div>
+              <div class="sticker-opt" onclick="addSticker('<i class=\'ph-fill ph-fire\'></i>')">
+                  <i class="ph-fill ph-fire"></i>
+              </div>
+          </div>
+          
+      </div>
+
     </div>
     
     <input type="file" id="frameImageInput" accept="image/*" style="display:none">
 
-    <div class="sidebar-footer">
-        <p>✨ Tip: Click & Drag image inside frame to adjust.</p>
-    </div>
+    
   </aside>
 
   <section class="canvas-wrapper">
-     
      <div class="canvas-toolbar">
          <div class="toolbar-title">
              <h3>My 2026 Vision</h3>

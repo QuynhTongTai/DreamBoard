@@ -377,6 +377,89 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+  // 4. LOAD MINI VISION BOARD (PREVIEW)
+    const miniCanvas = document.getElementById('miniCanvas');
+    if (miniCanvas) {
+        // Gọi API lấy dữ liệu Vision Board
+        fetch('api/get_vision.php')
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' && data.items) {
+                miniCanvas.innerHTML = ''; // Xóa loading text
+                
+                const layoutMeta = data.items.find(i => i.type === 'layout_meta');
+                
+                // A. Dựng khung Layout (Grid)
+                if (layoutMeta && layoutMeta.content !== 'free') {
+                    const grid = document.createElement('div');
+                    grid.className = `layout-${layoutMeta.content}`;
+                    miniCanvas.appendChild(grid);
+                    
+                    // Xác định số ô dựa trên layout
+                    let slotCount = 9;
+                    if (layoutMeta.content === 'masonry') slotCount = 5;
+                    if (layoutMeta.content === 'hero-center') slotCount = 9;
+
+                    // Tạo các ô trống (slots)
+                    for(let i=0; i<slotCount; i++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'frame-slot';
+                        slot.id = `mini-slot-${i}`; // Đánh dấu ID để lát nữa điền ảnh vào
+                        grid.appendChild(slot);
+                    }
+                }
+
+                // B. Điền các Item (Ảnh, Sticker, Text)
+                data.items.forEach(item => {
+                    
+                    // Trường hợp 1: Ảnh nằm trong khung (Layout Slot)
+                    if (layoutMeta && layoutMeta.content !== 'free' && item.type === 'layout_slot') {
+                        const targetSlot = document.getElementById(`mini-slot-${item.z_index}`);
+                        // Chỉ điền nếu tìm thấy slot và có đường dẫn ảnh
+                        if (targetSlot && item.image_path) {
+                            targetSlot.innerHTML = `<img src="${item.image_path}" style="object-position: ${item.content || 'center'}">`;
+                            targetSlot.classList.add('has-image');
+                        }
+                    }
+                    
+                    // Trường hợp 2: Vật phẩm trôi nổi (Sticker hoặc Text)
+                    else if (item.type !== 'layout_meta' && item.type !== 'layout_slot') {
+                        const el = document.createElement('div');
+                        el.className = `board-item`; // Class chung
+                        
+                        // Xử lý Text
+                        if (item.type.startsWith('text')) {
+                            el.classList.add('item-' + item.type); // vd: item-text_heading
+                            el.classList.add('item-text');
+                            el.innerText = item.content;
+                            // Reset font size mặc định để CSS tự xử lý
+                            el.style.fontSize = ''; 
+                        } 
+                        // Xử lý Sticker
+                        else {
+                            el.classList.add('item-sticker');
+                            el.innerHTML = item.content; // Dùng innerHTML để hiện icon/ảnh
+                        }
+
+                        // Set vị trí tọa độ (quan trọng)
+                        el.style.left = item.pos_x + 'px';
+                        el.style.top = item.pos_y + 'px';
+                        el.style.zIndex = item.z_index;
+                        
+                        miniCanvas.appendChild(el);
+                    }
+                });
+                
+            } else {
+                // Nếu chưa có dữ liệu thì hiện thông báo
+                miniCanvas.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#999"><p>No vision board yet</p><a href="vision.php" style="color:#6b5bff;text-decoration:none">Create one now</a></div>';
+            }
+        })
+        .catch(err => {
+            console.error("Lỗi load mini vision:", err);
+            miniCanvas.innerHTML = '<p style="text-align:center;padding-top:100px;color:#aaa">Cannot load vision board</p>';
+        });
+    }  
 });
 // --- HÀM UPLOAD AVATAR ---
 function uploadAvatar(input) {

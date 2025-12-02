@@ -71,7 +71,19 @@
     <div class="goals-footer-cta">
       <a href="javascript:void(0);" class="btn-view-all">View All Goals</a>
     </div>
+    <div class="dream-canvas-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h4 class="section-title" style="margin:0;">Your Dream Canvas</h4>
+        <a href="vision.php" style="font-size:13px; color:#6b5bff; text-decoration:none; font-weight:600;">Edit Canvas
+          &rarr;</a>
+      </div>
 
+      <div class="canvas-preview-wrapper">
+        <div id="miniCanvas" class="vision-board-canvas scaled-canvas">
+          <div class="loading-canvas">Loading your vision...</div>
+        </div>
+      </div>
+    </div>
     <h4 class="section-title">Journey Timeline</h4>
     <div class="timeline">
       <div class="timeline-list">
@@ -106,20 +118,24 @@
   <aside class="right-col">
     <div class="profile-card">
       <div class="avatar-wrapper">
-        <?php 
-            // Logic hiển thị ảnh: Nếu có trong DB thì hiện, không thì dùng UI Avatars
-            $avatarSrc = !empty($profile['avatar']) ? $profile['avatar'] : 
-                'https://ui-avatars.com/api/?name=' . urlencode($profile['username']) . '&background=C6A7FF&color=fff&size=128&rounded=true';
+        <?php
+        // Logic hiển thị ảnh: Nếu có trong DB thì hiện, không thì dùng UI Avatars
+        $avatarSrc = !empty($profile['avatar']) ? $profile['avatar'] :
+          'https://ui-avatars.com/api/?name=' . urlencode($profile['username']) . '&background=C6A7FF&color=fff&size=128&rounded=true';
         ?>
-        
+
         <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="profile-avatar-img" id="profileAvatarDisplay">
-        
+
         <label for="avatarUploadInput" class="btn-edit-avatar" title="Change Avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
         </label>
-        
+
         <input type="file" id="avatarUploadInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
-    </div>
+      </div>
       <div class="username"><?php echo htmlspecialchars($profile['username']); ?></div>
       <div class="meta"><?php echo htmlspecialchars($profile['email'] ?? ''); ?></div>
 
@@ -131,56 +147,60 @@
           <div class="stat"><strong><?php echo count($logs); ?></strong> entries</div>
         </div>
       </div>
-    </div><div class="side-box" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-            <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display';">Weekly Focus</h4>
-            <span style="font-size: 12px; background: #f3e8ff; color: #6b5bff; padding: 2px 8px; border-radius: 10px; font-weight: 600;">
-                <?php echo isset($activityStats) ? array_sum($activityStats) : 0; ?> entries
-            </span>
-        </div>
-        
-        <div class="bar-chart-container">
-            <?php
-                // Logic tạo 7 cột cho 7 ngày gần nhất
-                $today = new DateTime();
-                // Tìm số lượng bài nhiều nhất để làm mốc (Max Height)
-                $max_count = !empty($activityStats) ? max($activityStats) : 1; 
-                if ($max_count < 3) $max_count = 3; // Giới hạn min để cột không quá thấp
+    </div>
+    <div class="side-box"
+      style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+        <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display';">Weekly Focus</h4>
+        <span
+          style="font-size: 12px; background: #f3e8ff; color: #6b5bff; padding: 2px 8px; border-radius: 10px; font-weight: 600;">
+          <?php echo isset($activityStats) ? array_sum($activityStats) : 0; ?> entries
+        </span>
+      </div>
 
-                // Vòng lặp 7 ngày ngược từ hôm nay về quá khứ
-                for ($i = 6; $i >= 0; $i--) {
-                    $dateObj = (clone $today)->modify("-$i days");
-                    $dateStr = $dateObj->format('Y-m-d');
-                    // Lấy tên thứ (Mon, Tue...) hoặc lấy chữ cái đầu
-                    $dayLabel = $dateObj->format('D'); 
-                    $isToday = ($i === 0); // Kiểm tra xem có phải hôm nay không để tô màu khác
-                    
-                    $count = $activityStats[$dateStr] ?? 0;
-                    
-                    // Tính chiều cao % (tối đa 100px)
-                    $heightPercent = ($count / $max_count) * 100;
-                    // Nếu có bài viết thì ít nhất cao 10% cho đẹp, nếu 0 thì để 4% làm đế
-                    $displayHeight = ($count > 0) ? max($heightPercent, 15) : 4;
-            ?>
-                <div class="bar-group" title="<?php echo "$dateStr: $count entries"; ?>">
-                    <div class="bar <?php echo $isToday ? 'today' : ''; ?> <?php echo $count > 0 ? 'has-data' : ''; ?>" 
-                         style="height: <?php echo $displayHeight; ?>%;">
-                        
-                        <?php if ($count > 0): ?>
-                            <span class="bar-tooltip"><?php echo $count; ?></span>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <span class="day-label" style="<?php echo $isToday ? 'color:#6b5bff;font-weight:700;' : ''; ?>">
-                        <?php echo substr($dayLabel, 0, 1); ?>
-                    </span>
-                </div>
-            <?php } ?>
-        </div>
+      <div class="bar-chart-container">
+        <?php
+        // Logic tạo 7 cột cho 7 ngày gần nhất
+        $today = new DateTime();
+        // Tìm số lượng bài nhiều nhất để làm mốc (Max Height)
+        $max_count = !empty($activityStats) ? max($activityStats) : 1;
+        if ($max_count < 3)
+          $max_count = 3; // Giới hạn min để cột không quá thấp
         
-        <p style="text-align:center; font-size:11px; color:#999; margin-top:15px; margin-bottom:0;">
-            Your consistency last 7 days
-        </p>
+        // Vòng lặp 7 ngày ngược từ hôm nay về quá khứ
+        for ($i = 6; $i >= 0; $i--) {
+          $dateObj = (clone $today)->modify("-$i days");
+          $dateStr = $dateObj->format('Y-m-d');
+          // Lấy tên thứ (Mon, Tue...) hoặc lấy chữ cái đầu
+          $dayLabel = $dateObj->format('D');
+          $isToday = ($i === 0); // Kiểm tra xem có phải hôm nay không để tô màu khác
+        
+          $count = $activityStats[$dateStr] ?? 0;
+
+          // Tính chiều cao % (tối đa 100px)
+          $heightPercent = ($count / $max_count) * 100;
+          // Nếu có bài viết thì ít nhất cao 10% cho đẹp, nếu 0 thì để 4% làm đế
+          $displayHeight = ($count > 0) ? max($heightPercent, 15) : 4;
+          ?>
+          <div class="bar-group" title="<?php echo "$dateStr: $count entries"; ?>">
+            <div class="bar <?php echo $isToday ? 'today' : ''; ?> <?php echo $count > 0 ? 'has-data' : ''; ?>"
+              style="height: <?php echo $displayHeight; ?>%;">
+
+              <?php if ($count > 0): ?>
+                <span class="bar-tooltip"><?php echo $count; ?></span>
+              <?php endif; ?>
+            </div>
+
+            <span class="day-label" style="<?php echo $isToday ? 'color:#6b5bff;font-weight:700;' : ''; ?>">
+              <?php echo substr($dayLabel, 0, 1); ?>
+            </span>
+          </div>
+        <?php } ?>
+      </div>
+
+      <p style="text-align:center; font-size:11px; color:#999; margin-top:15px; margin-bottom:0;">
+        Your consistency last 7 days
+      </p>
     </div>
   </aside>
   <!-- Add Goal Modal -->

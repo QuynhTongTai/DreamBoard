@@ -1,58 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('canvas');
-    const fileInput = document.getElementById('fileInput');
     const frameInput = document.getElementById('frameImageInput');
-    
+
     let zIndexCounter = 100;
     let currentLayout = 'free';
     let currentSlotElement = null;
 
     // 1. LOAD DỮ LIỆU
-    /* =========================================
-       1. LOAD DỮ LIỆU TỪ SERVER
-       ================================********* */
+    // 1. LOAD DỮ LIỆU
     fetch('api/get_vision.php')
         .then(res => res.json())
         .then(data => {
-            if(data.status === 'success' && data.items) {
-                
-                // Tìm xem user đã lưu layout nào chưa?
+            if (data.status === 'success' && data.items) {
                 const layoutMeta = data.items.find(i => i.type === 'layout_meta');
 
                 if (layoutMeta) {
-                    // TRƯỜNG HỢP 1: ĐÃ LƯU LAYOUT (Grid hoặc Free)
-                    // Gọi hàm applyLayout để dựng khung trước (false = không xóa data)
-                    window.applyLayout(layoutMeta.content, false); 
-                    
-                    // Nếu là Grid, điền ảnh vào ô
-                    if (layoutMeta.content !== 'free') {
-                        data.items.forEach(item => {
-                            if (item.type === 'layout_slot') {
-                                const slots = document.querySelectorAll('.frame-slot');
-                                const slot = slots[item.z_index];
-                                if (slot && item.image_path) {
-                                    slot.innerHTML = `<img src="${item.image_path}">`;
-                                    slot.classList.add('has-image');
-                                    // Khôi phục vị trí ảnh
-                                    const img = slot.querySelector('img');
-                                    if (item.content) img.style.objectPosition = item.content;
-                                    attachDragToImage(img);
-                                }
+                    // Bước 1: Dựng khung layout trước
+                    window.applyLayout(layoutMeta.content, false);
+
+                    // Bước 2: Duyệt qua TẤT CẢ các item để hiển thị
+                    data.items.forEach(item => {
+                        
+                        // TRƯỜNG HỢP 1: Ảnh nằm trong khung (Layout Slot)
+                        // Chỉ xử lý khi không phải chế độ Free và item là layout_slot
+                        if (layoutMeta.content !== 'free' && item.type === 'layout_slot') {
+                            const slots = document.querySelectorAll('.frame-slot');
+                            // Dùng z_index để xác định ô thứ mấy
+                            const slot = slots[item.z_index]; 
+                            if (slot && item.image_path) {
+                                slot.innerHTML = `<img src="${item.image_path}">`;
+                                slot.classList.add('has-image');
+                                const img = slot.querySelector('img');
+                                // Load vị trí căn chỉnh ảnh (object-position)
+                                if (item.content) img.style.objectPosition = item.content;
+                                attachDragToImage(img);
                             }
-                        });
-                    } 
-                    // Nếu là Free, vẽ item trôi nổi
-                    else {
-                        data.items.forEach(item => {
-                            if (item.type !== 'layout_meta' && item.type !== 'layout_slot') {
-                                renderFloatingItem(item);
-                            }
-                        });
-                    }
+                        }
+                        
+                        // TRƯỜNG HỢP 2: Vật phẩm trôi nổi (Sticker, Text, Note...)
+                        // Hiển thị ở CẢ chế độ Free lẫn Grid Layout
+                        // Loại trừ layout_meta (đã dùng ở trên) và layout_slot (đã xử lý ở trên)
+                        else if (item.type !== 'layout_meta' && item.type !== 'layout_slot') {
+                            renderFloatingItem(item);
+                        }
+                    });
 
                 } else {
-                    // TRƯỜNG HỢP 2: CHƯA CÓ DỮ LIỆU (LẦN ĐẦU VÀO)
-                    // Bắt buộc gọi hàm này để khởi tạo giao diện mặc định
+                    // Nếu không có dữ liệu cũ thì mặc định Free
                     window.applyLayout('free', false);
                 }
             }
@@ -60,9 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("Lỗi load vision:", err));
 
     // 2. XỬ LÝ LAYOUT
-    window.applyLayout = function(layoutName, confirmClear = true) {
-        if (confirmClear && canvas.children.length > 0 && !document.querySelector('.canvas-placeholder')) {
-            if (!confirm("Đổi layout sẽ xóa bảng hiện tại. Tiếp tục?")) return;
+    window.applyLayout = function (layoutName, confirmClear = true) {
+        const hasContent = canvas.children.length > 0 && !canvas.querySelector('.canvas-placeholder');
+
+        if (confirmClear && hasContent) {
+            if (!confirm("Đổi layout sẽ làm mới bảng. Bạn có chắc không?")) return;
         }
 
         canvas.innerHTML = '';
@@ -71,58 +67,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (layoutName === 'free') {
             currentLayout = 'free';
-            canvas.innerHTML = '<div class="canvas-placeholder"><i class="ph-duotone ph-image-square"></i><p>Free Style Mode</p></div>';
+            canvas.innerHTML = `
+                <div class="canvas-placeholder">
+                    <i class="ph-duotone ph-pencil-simple-slash"></i>
+                    <p>Free Mode - Drag & Drop Stickers</p>
+                </div>`;
             return;
         }
 
         currentLayout = layoutName;
         const grid = document.createElement('div');
         grid.className = `layout-${layoutName}`;
+        grid.style.width = "100%";
+        grid.style.height = "100%";
         canvas.appendChild(grid);
 
         let slotCount = 9;
-        if (layoutName === 'masonry') slotCount = 3;
-        if (layoutName === 'film-strip') slotCount = 4;
+        if (layoutName === 'masonry') slotCount = 5;
+        if (layoutName === 'hero-center') slotCount = 9;
 
         for (let i = 0; i < slotCount; i++) {
             const slot = document.createElement('div');
             slot.className = 'frame-slot';
             slot.innerHTML = '<span class="slot-hint">+</span>';
             
-            // Click để upload
+            // 1. CLICK ĐƠN: Chỉ hoạt động khi ô đang trống
             slot.addEventListener('click', function(e) {
-                if(e.target.tagName === 'IMG') return; // Nếu click vào ảnh thì ko upload lại
+                // Nếu click vào ảnh đang có -> Bỏ qua (để dành cho thao tác kéo)
+                if(e.target.tagName === 'IMG') return; 
+                
                 currentSlotElement = this;
                 frameInput.click();
             });
+
+            // 2. DOUBLE CLICK (MỚI): Để thay thế ảnh khác
+            slot.addEventListener('dblclick', function(e) {
+                currentSlotElement = this;
+                frameInput.click();
+            });
+
             grid.appendChild(slot);
         }
     };
 
-    window.toggleFramePanel = function() {
+    window.toggleFramePanel = function () {
         document.getElementById('frameSelectionPanel').classList.toggle('hidden');
+        document.getElementById('textSelectionPanel').classList.add('hidden');
+        document.getElementById('stickerSelectionPanel').classList.add('hidden');
     };
 
-    // 3. UPLOAD ẢNH VÀO KHUNG
+    window.toggleTextPanel = function () {
+        document.getElementById('textSelectionPanel').classList.toggle('hidden');
+        document.getElementById('frameSelectionPanel').classList.add('hidden');
+        document.getElementById('stickerSelectionPanel').classList.add('hidden');
+    };
+
+    // MỚI: Toggle Sticker Menu
+    window.toggleStickerPanel = function () {
+        document.getElementById('stickerSelectionPanel').classList.toggle('hidden');
+        document.getElementById('frameSelectionPanel').classList.add('hidden');
+        document.getElementById('textSelectionPanel').classList.add('hidden');
+    };
+
+    // MỚI: Chọn Sticker từ thư viện
+    window.addSticker = function (contentHtml) {
+        renderFloatingItem({ type: 'sticker', content: contentHtml, pos_x: 100, pos_y: 100 });
+        document.getElementById('stickerSelectionPanel').classList.add('hidden');
+    }
+
+    window.addText = function (type) {
+        let content = 'Double click to edit';
+        if (type === 'text_heading') content = 'MY GOAL';
+        if (type === 'text_quote') content = '"Dream big, work hard"';
+
+        renderFloatingItem({ type: type, content: content, pos_x: 150, pos_y: 150 });
+        document.getElementById('textSelectionPanel').classList.add('hidden');
+    };
+
+    // 3. UPLOAD ẢNH (Giữ nguyên)
     if (frameInput) {
-        frameInput.addEventListener('change', function(e) {
+        frameInput.addEventListener('change', function (e) {
             const file = this.files[0];
             if (!file || !currentSlotElement) return;
 
             const formData = new FormData(); formData.append('image', file);
             fetch('api/upload_vision.php', { method: 'POST', body: formData })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') {
-                    currentSlotElement.innerHTML = `<img src="${data.path}">`;
-                    currentSlotElement.classList.add('has-image');
-                    attachDragToImage(currentSlotElement.querySelector('img'));
-                }
-            });
+                .then(res => res.json()).then(data => {
+                    if (data.status === 'success') {
+                        currentSlotElement.innerHTML = `<img src="${data.path}">`;
+                        currentSlotElement.classList.add('has-image');
+                        attachDragToImage(currentSlotElement.querySelector('img'));
+                    }
+                });
             this.value = '';
         });
     }
 
-    // 4. KÉO ĐỂ CĂN CHỈNH ẢNH (REPOSITION)
+    // 4. DRAG ẢNH
     function attachDragToImage(img) {
         let isDragging = false, startX, startY;
         let initialPosX = 50, initialPosY = 50;
@@ -132,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isDragging = true;
             startX = e.clientX; startY = e.clientY;
             img.parentElement.classList.add('is-dragging');
-            
             const pos = window.getComputedStyle(img).objectPosition.split(' ');
             initialPosX = parseFloat(pos[0]) || 50;
             initialPosY = parseFloat(pos[1]) || 50;
@@ -140,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            const deltaX = (startX - e.clientX) * 0.2; 
+            const deltaX = (startX - e.clientX) * 0.2;
             const deltaY = (startY - e.clientY) * 0.2;
             let newX = Math.max(0, Math.min(100, initialPosX + deltaX));
             let newY = Math.max(0, Math.min(100, initialPosY + deltaY));
@@ -148,41 +188,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('mouseup', () => {
-            if(isDragging) {
+            if (isDragging) {
                 isDragging = false;
                 img.parentElement.classList.remove('is-dragging');
             }
         });
     }
 
-    // 5. THÊM ITEM TRANG TRÍ
-    document.getElementById('btnAddText').addEventListener('click', () => {
-        renderFloatingItem({ type: 'text', content: 'Note...', pos_x: 50, pos_y: 50 });
-    });
-    document.getElementById('btnStickers').addEventListener('click', () => {
-        const stickers = ['✨', '❤️', '🎯', '🍀', '🔥'];
-        const random = stickers[Math.floor(Math.random() * stickers.length)];
-        renderFloatingItem({ type: 'sticker', content: random, pos_x: 100, pos_y: 100 });
-    });
-
+    // 5. RENDER ITEM (Cập nhật để hiển thị sticker HTML)
     function renderFloatingItem(data) {
         const el = document.createElement('div');
-        el.className = `board-item item-${data.type}`;
+        el.className = `board-item`;
+
+        if (data.type.startsWith('text')) {
+            el.classList.add('item-' + data.type);
+            el.classList.add('item-text');
+            el.contentEditable = true;
+            el.innerText = data.content;
+            el.style.fontSize = '';
+        }
+        else {
+            el.classList.add(`item-sticker`); // Class chung cho sticker
+            // Ở đây data.content có thể là HTML (ví dụ: <i class...>) hoặc Emoji
+            el.innerHTML = data.content;
+        }
+
         el.style.left = data.pos_x + 'px';
         el.style.top = data.pos_y + 'px';
         el.style.zIndex = zIndexCounter++;
-        
-        if (data.type === 'text') {
-            el.contentEditable = true; el.innerText = data.content;
-        } else {
-            el.innerHTML = data.content; el.style.fontSize = '60px';
-        }
 
-        // Drag Logic
-        let isDown = false, offset = [0,0];
-        el.addEventListener('mousedown', (e) => { isDown = true; offset = [el.offsetLeft-e.clientX, el.offsetTop-e.clientY]; });
+        let isDown = false, offset = [0, 0];
+        el.addEventListener('mousedown', (e) => { isDown = true; offset = [el.offsetLeft - e.clientX, el.offsetTop - e.clientY]; });
         document.addEventListener('mouseup', () => isDown = false);
-        document.addEventListener('mousemove', (e) => { if(isDown) { el.style.left = (e.clientX+offset[0])+'px'; el.style.top = (e.clientY+offset[1])+'px'; }});
+        document.addEventListener('mousemove', (e) => { if (isDown) { el.style.left = (e.clientX + offset[0]) + 'px'; el.style.top = (e.clientY + offset[1]) + 'px'; } });
         el.addEventListener('dblclick', () => el.remove());
 
         canvas.appendChild(el);
@@ -191,10 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. LƯU BOARD
     document.getElementById('saveBtn').addEventListener('click', () => {
         const items = [];
-        
-        // Lưu Layout
+
         if (currentLayout !== 'free') {
-            items.push({ type: 'layout_meta', content: currentLayout, pos_x:0, pos_y:0, width:0, height:0, z_index:0 });
+            items.push({ type: 'layout_meta', content: currentLayout, pos_x: 0, pos_y: 0, width: 0, height: 0, z_index: 0 });
             document.querySelectorAll('.frame-slot').forEach((slot, index) => {
                 const img = slot.querySelector('img');
                 if (img) {
@@ -202,18 +239,32 @@ document.addEventListener('DOMContentLoaded', () => {
                         type: 'layout_slot',
                         image_path: img.src,
                         z_index: index,
-                        content: img.style.objectPosition || '50% 50%', // Lưu vị trí căn chỉnh
+                        content: img.style.objectPosition || '50% 50%',
                         pos_x: 0, pos_y: 0, width: 0, height: 0
                     });
                 }
             });
         }
 
-        // Lưu Stickers/Text
         document.querySelectorAll('.board-item').forEach(el => {
+            let type = 'sticker';
+            let content = el.innerHTML; // Lấy HTML thay vì innerText để giữ thẻ <i> hoặc <img>
+
+            if (el.classList.contains('item-text')) {
+                // Nếu là text thì phải xác định loại text
+                if (el.classList.contains('item-text_heading')) type = 'text_heading';
+                else if (el.classList.contains('item-text_body')) type = 'text_body';
+                else if (el.classList.contains('item-text_quote')) type = 'text_quote';
+                else if (el.classList.contains('item-text_note')) type = 'text_note';
+                else if (el.classList.contains('item-text_neon')) type = 'text_neon';
+                else type = 'text';
+
+                content = el.innerText; // Text thì chỉ lấy nội dung chữ
+            }
+
             items.push({
-                type: el.classList.contains('item-text') ? 'text' : 'sticker',
-                content: el.innerText,
+                type: type,
+                content: content,
                 image_path: '',
                 pos_x: parseFloat(el.style.left), pos_y: parseFloat(el.style.top),
                 width: 0, height: 0, z_index: 100, rotation: 0
@@ -221,19 +272,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         fetch('api/save_vision.php', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: items })
         }).then(res => res.json()).then(d => {
-            if(d.status === 'success') alert('Saved! 💾');
+            if (d.status === 'success') alert('Saved! 💾');
             else alert('Error saving');
         });
     });
-    
-    // Clear
+
     document.getElementById('clearBtn').addEventListener('click', () => {
-        if(confirm('Clear all?')) {
+        if (confirm('Clear all?')) {
             window.applyLayout('free', false);
             fetch('api/save_vision.php', { method: 'POST', body: JSON.stringify({ items: [] }) });
         }
     });
+    // ... (Code Save và Clear ở trên giữ nguyên)
+
+    // 7. EXPORT HÌNH ẢNH (MỚI)
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const board = document.getElementById('canvas');
+
+        // Hiệu ứng thông báo đang xử lý
+        const originalText = document.getElementById('exportBtn').innerHTML;
+        document.getElementById('exportBtn').innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Saving...';
+
+        // Dùng html2canvas chụp lại vùng #canvas
+        // scale: 2 để ảnh nét hơn (chất lượng cao)
+        html2canvas(board, { scale: 2, useCORS: true }).then(canvas => {
+
+            // Tạo thẻ <a> ảo để tự động tải xuống
+            const link = document.createElement('a');
+            link.download = 'My-Vision-Board-2026.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            // Trả lại nút bấm cũ
+            document.getElementById('exportBtn').innerHTML = originalText;
+        }).catch(err => {
+            console.error(err);
+            alert("Lỗi khi xuất ảnh. Vui lòng thử lại!");
+            document.getElementById('exportBtn').innerHTML = originalText;
+        });
+    });
+
+    // Kết thúc file (đóng DOMContentLoaded)
 });

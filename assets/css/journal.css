@@ -11,12 +11,18 @@
 }
 
 body {
+    
+  /* Thêm lớp phủ màu trắng mờ (rgba) đè lên ảnh */
+  /* 0.6 là độ mờ (từ 0 đến 1). Số càng lớn thì càng trắng/mờ */
+  background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)),
+              url('../images/galaxy3.jpg') no-repeat center center fixed;
+  
+  background-size: cover;
+  font-family: 'Quicksand', sans-serif;
+  color: #444;
+
   margin: 0;
   font-family: "Poppins", sans-serif;
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(198, 167, 255, 0.08), transparent 10%),
-              radial-gradient(800px 500px at 90% 90%, rgba(183, 227, 208, 0.06), transparent 10%),
-              var(--bg);
-  color: #2b2b2b;
 }
 
 .container {
