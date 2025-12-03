@@ -34,7 +34,8 @@ class JournalModel
     }
 
     // 2.Hàm LẤY TẤT CẢ NHẬT KÝ CỦA 1 USER (Read)
-    public function getLogsByUserId($user_id) {
+    public function getLogsByUserId($user_id)
+    {
         $query = "SELECT j.*, g.title as goal_title, g.topic_id 
                   FROM " . $this->table_name . " j
                   LEFT JOIN goals g ON j.goal_id = g.goal_id
@@ -82,16 +83,24 @@ class JournalModel
     // NEW: lấy goals của user
     public function getGoalsByUser($user_id)
     {
-        $query = "SELECT * FROM goals WHERE user_id = :user_id ORDER BY created_at DESC";
+        // JOIN với bảng topics để lấy màu (t.color) và tên topic (t.name)
+        $query = "SELECT g.*, t.color as topic_color, t.name as topic_name 
+                  FROM goals g
+                  LEFT JOIN topics t ON g.topic_id = t.topic_id
+                  WHERE g.user_id = :user_id 
+                  ORDER BY g.created_at DESC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     // --- HÀM MỚI: TÌM HOẶC TẠO TOPIC ---
-    public function getOrCreateTopic($user_id, $topic_name) {
+    public function getOrCreateTopic($user_id, $topic_name)
+    {
         $topic_name = trim($topic_name);
-        if (empty($topic_name)) return null;
+        if (empty($topic_name))
+            return null;
 
         // 1. Kiểm tra xem topic đã tồn tại chưa
         $queryCheck = "SELECT topic_id FROM topics WHERE user_id = :uid AND name = :name LIMIT 1";
@@ -105,14 +114,23 @@ class JournalModel
 
         // 2. Nếu chưa có -> Tạo mới
         // Random màu pastel xinh xinh cho topic mới
-        $colors = ['#FFD8C3', '#C6A7FF', '#B7E3D0', '#FFCCA7', '#ACE7FF', '#FFABAB'];
+        $colors = [
+            '#FFF0F5',
+            '#F0F8FF',
+            '#F5F5DC',
+            '#E6E6FA',
+            '#F0FFF4',
+            '#FFFACD',
+            '#F3E8FF',
+            '#FFE4E1'
+        ];
         $randomColor = $colors[array_rand($colors)];
 
         $queryInsert = "INSERT INTO topics (user_id, name, color) VALUES (:uid, :name, :color)";
         $stmtIn = $this->conn->prepare($queryInsert);
         $stmtIn->execute([
-            ':uid' => $user_id, 
-            ':name' => $topic_name, 
+            ':uid' => $user_id,
+            ':name' => $topic_name,
             ':color' => $randomColor
         ]);
 
@@ -121,23 +139,43 @@ class JournalModel
     // File: app/models/JournalModel.php
 
     // Hàm này chỉ làm nhiệm vụ lưu vào Database
-    public function addGoal($user_id, $title, $topic_id) {
+    public function addGoal($user_id, $title, $topic_id)
+    {
         $query = "INSERT INTO goals (user_id, title, topic_id, progress, created_at) 
                   VALUES (:uid, :title, :topic_id, 0, NOW())";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
-        
+
         // Xử lý nếu topic_id là null (topic chung)
         if (empty($topic_id) || $topic_id === 'all') {
             $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindParam(':topic_id', $topic_id);
         }
-        
+
         return $stmt->execute();
+    }
+    // Thêm hàm này vào trong class JournalModel
+    public function deleteGoal($goal_id, $user_id)
+    {
+        try {
+            // BƯỚC 1: Xóa tất cả Nhật ký (Logs) liên quan đến Goal này trước
+            $queryLogs = "DELETE FROM journey_log WHERE goal_id = :goal_id AND user_id = :user_id";
+            $stmtLogs = $this->conn->prepare($queryLogs);
+            $stmtLogs->execute([':goal_id' => $goal_id, ':user_id' => $user_id]);
+
+            // BƯỚC 2: Sau đó mới xóa Goal
+            $queryGoal = "DELETE FROM goals WHERE goal_id = :goal_id AND user_id = :user_id";
+            $stmtGoal = $this->conn->prepare($queryGoal);
+            $stmtGoal->execute([':goal_id' => $goal_id, ':user_id' => $user_id]);
+
+            return true;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
     // Thêm vào class JournalModel
     public function getLogsByGoalId($user_id, $goal_id)
@@ -193,24 +231,26 @@ class JournalModel
 
         return false;
     }
-public function getTopics($user_id) {
+    public function getTopics($user_id)
+    {
         $query = "SELECT * FROM topics WHERE user_id = :uid";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':uid' => $user_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     // Thêm vào JournalModel
-    public function getLast7DaysStats($user_id) {
+    public function getLast7DaysStats($user_id)
+    {
         // Lấy ngày và số lượng bài viết trong 7 ngày gần nhất
         $query = "SELECT DATE(created_at) as entry_date, COUNT(*) as count 
                   FROM " . $this->table_name . " 
                   WHERE user_id = :uid 
                   AND created_at >= DATE(NOW()) - INTERVAL 6 DAY
                   GROUP BY entry_date";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':uid' => $user_id]);
-        
+
         // Chuyển kết quả thành mảng dạng ['2025-11-28' => 2, '2025-11-29' => 1]
         $stats = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

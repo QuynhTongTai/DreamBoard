@@ -37,17 +37,25 @@ function filterContent() {
 }
 
 // --- HÀM CẬP NHẬT UI GOAL CARD ---
+// File: assets/js/journal.js
+
 function updateGoalCardUI(goalId, newProgress) {
     const goalCard = document.getElementById(`goal-card-${goalId}`);
+    
     if (goalCard) {
-        // Cập nhật text %
-        const progressText = goalCard.querySelector('.progress');
-        if (progressText) progressText.innerText = newProgress + '%';
+        // 1. Cập nhật số hiển thị
+        const progressValue = goalCard.querySelector('.progress-value');
+        if (progressValue) progressValue.innerText = newProgress + '%';
         
-        // Cập nhật tham số onclick để lần sau mở ra đúng số
+        // 2. Cập nhật biến CSS để vòng tròn xoay lại
+        const circularProgress = goalCard.querySelector('.circular-progress');
+        if (circularProgress) {
+            circularProgress.style.setProperty('--p', newProgress);
+        }
+        
+        // 3. Cập nhật tham số onclick (giữ nguyên logic cũ)
         let onclickAttr = goalCard.getAttribute('onclick');
         if (onclickAttr) {
-            // Thay thế số % cũ bằng số mới (dùng Regex tìm số cuối cùng trong ngoặc)
             onclickAttr = onclickAttr.replace(/,\s*\d+\s*\)$/, `, ${newProgress})`);
             goalCard.setAttribute('onclick', onclickAttr);
         }
@@ -195,8 +203,46 @@ function collapseAddJourneyPanel() {
     const box = document.getElementById('goalModalBox');
     if (box) box.classList.remove('expanded');
 }
+// Tìm hàm này và thay thế nội dung:
 function deleteCurrentGoal() {
-    if (confirm("Delete this goal?")) alert("Cần backend xử lý.");
+    // Lấy ID của goal đang mở (đã được gán vào input hidden khi mở modal)
+    const goalId = document.getElementById('hiddenGoalId').value;
+    
+    if (!goalId) return;
+
+    if (confirm("Bạn có chắc chắn muốn xóa mục tiêu này? \nTất cả nhật ký liên quan cũng sẽ bị xóa vĩnh viễn!")) {
+        
+        // Hiệu ứng nút đang xóa (Optional)
+        const btnDelete = document.querySelector('.btn-delete-goal');
+        const originalText = btnDelete.innerHTML;
+        btnDelete.innerHTML = 'Deleting...';
+        btnDelete.disabled = true;
+
+        fetch('api/delete_goal.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `goal_id=${goalId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert("Đã xóa mục tiêu thành công!");
+                closeGoalDetails();
+                location.reload(); // Tải lại trang để cập nhật danh sách
+            } else {
+                alert("Lỗi: " + data.message);
+                // Trả lại nút nếu lỗi
+                btnDelete.innerHTML = originalText;
+                btnDelete.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Lỗi kết nối server");
+            btnDelete.innerHTML = originalText;
+            btnDelete.disabled = false;
+        });
+    }
 }
 
 

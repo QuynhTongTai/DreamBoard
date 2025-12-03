@@ -1,4 +1,5 @@
 <!-- views/journal_view.php -->
+ <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <main class="container">
   <section class="left-col">
 
@@ -46,28 +47,52 @@
     <div class="goals">
       <?php if (!empty($goals)): ?>
         <?php foreach ($goals as $index => $g): ?>
-          <div class="goal-card filter-item" data-type="goal" data-topic-id="<?php echo $g['topic_id']; ?>"
-            data-search-text="<?php echo strtolower(htmlspecialchars($g['title'])); ?>"
-            onclick="openGoalDetails(<?php echo $g['goal_id']; ?>, '<?php echo htmlspecialchars($g['title']); ?>', <?php echo intval($g['progress']); ?>)"
-            style="background: linear-gradient(135deg,#fff,#f8f6ff); <?php if ($index >= 3)
-              echo 'display:none;'; ?>">
+          
+          <?php 
+            $bgColor = !empty($g['topic_color']) ? $g['topic_color'] : '#f9f9f9';
+            $percent = intval($g['progress']);
+            
+            // DANH SÁCH ICON "XINH XINH" (Random ngẫu nhiên)
+            $cuteIcons = [
+                'ph-fill ph-sparkle',       // Lấp lánh
+                'ph-fill ph-star',          // Ngôi sao
+                'ph-fill ph-heart',         // Trái tim
+                'ph-fill ph-flower',        // Bông hoa
+                'ph-fill ph-plant',         // Chậu cây
+                'ph-fill ph-butterfly',     // Con bướm
+                'ph-fill ph-moon-stars',    // Trăng sao
+                'ph-fill ph-coffee',        // Cốc cafe chill
+                'ph-fill ph-music-notes'    // Nốt nhạc
+            ];
+            // Chọn bừa 1 cái dựa trên ID của goal để nó cố định (không bị đổi mỗi khi F5)
+            $iconIndex = $g['goal_id'] % count($cuteIcons); 
+            $randomIconClass = $cuteIcons[$iconIndex];
+          ?>
 
-            <div class="badge">🎯</div>
+          <div class="goal-card filter-item" 
+               data-type="goal" 
+               data-topic-id="<?php echo $g['topic_id']; ?>"
+               data-search-text="<?php echo strtolower(htmlspecialchars($g['title'])); ?>"
+               id="goal-card-<?php echo $g['goal_id']; ?>"
+               onclick="openGoalDetails(<?php echo $g['goal_id']; ?>, '<?php echo htmlspecialchars($g['title']); ?>', <?php echo $percent; ?>)"
+               style="background-color: <?php echo $bgColor; ?>; <?php if ($index >= 9) echo 'display:none;'; ?>">
+
+            <i class="<?php echo $randomIconClass; ?> goal-icon-standalone"></i>
+
             <div class="goal-info">
               <h4><?php echo htmlspecialchars($g['title']); ?></h4>
-              <div style="display:flex;gap:12px;align-items:center">
-                <div class="progress"><?php echo intval($g['progress']); ?>%</div>
-                <div style="color:var(--muted);font-size:13px">
-                  <?php echo 'Created: ' . date('M d, Y', strtotime($g['created_at'])); ?>
-                </div>
-              </div>
+              <span class="topic-tag"><?php echo htmlspecialchars($g['topic_name'] ?? 'General'); ?></span>
+            </div>
+
+            <div class="circular-progress" style="--p:<?php echo $percent; ?>;">
+              <div class="inner-circle"></div>
+              <span class="progress-value"><?php echo $percent; ?>%</span>
             </div>
 
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
     </div>
-
     <div class="goals-footer-cta">
       <a href="javascript:void(0);" class="btn-view-all">View All Goals</a>
     </div>

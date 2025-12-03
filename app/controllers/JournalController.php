@@ -293,4 +293,34 @@ class JournalController
         }
         exit;
     }
+    // Thêm hàm này vào trong class JournalController
+    public function deleteGoal()
+    {
+        // Trả về JSON
+        header('Content-Type: application/json');
+        
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $user_id = $_SESSION['user_id'];
+        $goal_id = $_POST['goal_id'] ?? 0;
+
+        if (!$goal_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Missing Goal ID']);
+            exit;
+        }
+
+        $model = new JournalModel();
+        
+        // Gọi hàm xóa trong Model
+        if ($model->deleteGoal($goal_id, $user_id)) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Could not delete goal']);
+        }
+        exit;
+    }
 }

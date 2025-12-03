@@ -1,870 +1,442 @@
+/* =========================================
+   1. VARIABLES & GLOBAL SETTINGS
+   ================================********* */
 :root {
   --bg: #fbf7ff;
   --card: #ffffff;
   --muted: #8b8790;
   --accent1: #C6A7FF;
-  --accent2: #B7E3D0;
-  --accent3: #FFD8C3;
-  --glass: rgba(255, 255, 255, 0.7);
-  --radius: 16px;
+  --text-dark: #2d3436;
+  --primary: #6b5bff;
   --shadow: 0 6px 20px rgba(20, 20, 40, 0.06);
 }
 
 body {
-    
-  /* Thêm lớp phủ màu trắng mờ (rgba) đè lên ảnh */
-  /* 0.6 là độ mờ (từ 0 đến 1). Số càng lớn thì càng trắng/mờ */
-  background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)),
-              url('../images/galaxy3.jpg') no-repeat center center fixed;
-  
-  background-size: cover;
-  font-family: 'Quicksand', sans-serif;
-  color: #444;
-
   margin: 0;
   font-family: "Poppins", sans-serif;
+  color: #444;
+  /* Background Galaxy mờ ảo */
+  background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)),
+              url('../images/galaxy3.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
 
+/* Layout chính chia 2 cột */
 .container {
   max-width: 1200px;
   margin: 28px auto;
   padding: 0 18px;
   display: grid;
-  
-  /* Tỉ lệ 65% - 35% hoặc chỉnh thành 300px cố định nếu muốn */
-  grid-template-columns: 1fr 320px; /* Cột trái tự giãn, cột phải cố định 320px (rộng rãi hơn) */
-  
-  gap: 30px; /* Tăng khoảng cách giữa 2 cột cho thoáng */
+  grid-template-columns: 1fr 320px; /* Cột trái linh hoạt - Cột phải 320px */
+  gap: 30px;
   align-items: start;
 }
 
-/* Responsive: Trên mobile thì dồn thành 1 cột */
+/* Responsive: Mobile về 1 cột */
 @media (max-width: 900px) {
   .container { grid-template-columns: 1fr; }
 }
 
-
-.goal-card {
-  flex: 1;
-  background: var(--card);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-}
-
-.badge {
-  width: 68px;
-  height: 68px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Tiêu đề Section nhỏ */
+.section-title {
+  color: #888;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   font-weight: 600;
-  color: #3a2bff;
-  box-shadow: 0 6px 18px rgba(58, 43, 255, 0.06);
+  margin: 30px 0 15px 0;
 }
 
-.goal-info h4 {
-  margin: 0 0 6px 0;
-  font-size: 16px;
-}
 
-.progress {
-  width: 100px;
-  height: 24px;
-  background: linear-gradient(90deg, #f3f3f7, #fff);
-  border-radius: 12px;
+/* =========================================
+   2. DASHBOARD HEADER & SEARCH
+   ================================********* */
+.dashboard-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #6b5bff;
-  font-size: 14px;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-/* Timeline */
-.timeline {
-  margin-top: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.6));
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-}
-
-.timeline h3 {
-  font-family: "Playfair Display", serif;
-  margin: 0 0 14px 0;
-  font-size: 20px;
+.header-titles h3 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
   color: #3b2b7a;
+  font-size: 28px;
+}
+.header-titles p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #888;
 }
 
-.timeline-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-left: 18px;
-}
-
-.tl-item {
-  background: white;
-  border-radius: 12px;
-  padding: 12px 14px;
-  box-shadow: 0 6px 20px rgba(30, 30, 80, 0.04);
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.tl-body small { color: var(--muted); display: block; margin-bottom: 6px; }
-.tl-body p { margin: 0; color: #333; }
-
-/* Profile */
-.profile-card {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 18px;
-  text-align: center;
-  box-shadow: var(--shadow);
-}
-
-.avatar {
-  width: 110px;
-  height: 110px;
-  border-radius: 20px;
-  margin: 0 auto 12px;
+.header-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 42px;
-  color: white;
-  font-weight: 700;
-  background: linear-gradient(135deg, #ffd8c3, #c6a7ff);
-  box-shadow: 0 12px 30px rgba(120, 80, 200, 0.06);
+  gap: 15px;
 }
 
-.username { font-weight: 600; margin-bottom: 6px; }
-.meta { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+/* Ô tìm kiếm bo tròn */
+.search-wrapper { position: relative; }
+.search-wrapper input {
+  padding: 10px 15px 10px 40px;
+  border-radius: 25px;
+  border: 1px solid #e0e0e0;
+  outline: none;
+  width: 240px;
+  font-size: 14px;
+  transition: all 0.3s;
+  background: #fff;
+}
+.search-wrapper input:focus {
+  border-color: #c6a7ff;
+  box-shadow: 0 2px 8px rgba(198, 167, 255, 0.15);
+  width: 280px;
+}
+.search-wrapper svg {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: #999;
+}
+
+/* Nút New Goal màu tím */
 .btn-add-goal {
-  display: flex;
-  align-items: center; /* SỬA LỖI: Phải là center, không phải right */
-  gap: 8px;
-  
+  display: flex; align-items: center; gap: 8px;
   background: linear-gradient(135deg, #E9D5FF 0%, #F3E8FF 100%);
   color: #7E22CE;
-  
   padding: 8px 16px;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
-  
-  /* Thêm cái này để nút không bị giãn hết chiều ngang nếu nằm trong flex */
-  width: fit-content; 
-  
   box-shadow: 0 2px 6px rgba(126, 34, 206, 0.15);
   transition: all 0.3s ease;
-  border: 1px solid transparent;
 }
-
-/* Hiệu ứng hover */
 .btn-add-goal:hover {
   transform: translateY(-2px);
   background: white;
-  border-color: #E9D5FF;
   box-shadow: 0 4px 12px rgba(126, 34, 206, 0.2);
 }
 
-/* Hiệu ứng xoay icon khi di chuột */
-.btn-add-goal svg {
-  transition: transform 0.3s ease;
-}
 
-
-@media (max-width:900px) {
-  .container { grid-template-columns: 1fr; padding: 0 14px; }
-  .goals { flex-direction: column; }
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.hidden {
-  display: none;
-}
-
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(2px);
-}
-
-.modal-box {
-  position: relative;
-  background: #ffffff;
-  padding: 22px;
-  width: 360px;
-  border-radius: 12px;
-  box-shadow: 0 8px 26px rgba(0,0,0,0.15);
-  animation: pop .22s ease-out;
-  z-index: 1000;
-}
-
-@keyframes pop {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-
-.modal-box h3 {
-  margin-top: 0;
-  margin-bottom: 14px;
-  font-family: 'Playfair Display', serif;
-  color: #3b2b7a;
-}
-
-.modal-box input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  margin-bottom: 18px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.btn-cancel {
-  padding: 7px 16px;
-  background: #eee;
-  border-radius: 6px;
-  border: none;
-}
-
-.btn-save {
-  padding: 7px 16px;
-  background: #6b5bff;
-  color: white;
-  border-radius: 6px;
-  border: none;
-}
-.goals-footer-cta {
-    display: flex;
-    justify-content: center; /* Căn nút ra giữa */
-    margin-top: 10px;
-    margin-bottom: 25px; /* Tạo khoảng trống trước Timeline */
-}
-
-.btn-view-all {
-    background: var(--card); /* Nền trắng */
-    color: var(--muted);      /* Chữ xám nhạt */
-    border: 1px solid rgba(139, 135, 144, 0.1); /* Viền mờ */
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-weight: 500;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.btn-view-all:hover {
-    color: #6b5bff; /* Đổi sang màu tím accent */
-    border-color: #6b5bff;
-    box-shadow: 0 4px 10px rgba(107, 91, 255, 0.1);
-}
-.goals {
-  display: flex;
-  flex-wrap: wrap; /* cho phép xuống hàng */
-  gap: 16px; 
-   margin-bottom: 22px;      /* khoảng cách giữa các goal */
-}
-
-.goal-card {
-  flex: 0 0 calc(33.333% - 16px); /* mỗi goal chiếm 1/3 chiều ngang trừ gap */
-  box-sizing: border-box;
-  margin-bottom: 16px; /* khoảng cách dọc giữa các hàng */
-}
-.goal-card {
-  background: linear-gradient(135deg,#fff,#f8f6ff);
-  border-radius: 8px;
-  padding: 12px;
-  /* các style xinh xinh khác */
-}
-
-.hidden-goal {
-  display: none;
-}
-.goal-card {
-  flex: 1 1 calc(33.33% - 16px); /* mỗi card 1/3 chiều ngang */
-  max-width: calc(33.33% - 16px);
-}
-/* CSS cho Modal Chi Tiết (To hơn modal thêm mới) */
-.modal-large {
-    width: 600px;
-    max-width: 90%;
-    height: 80vh; /* Cao 80% màn hình */
-    display: flex;
-    flex-direction: column;
-    padding: 0; /* Reset padding để header đẹp */
-    overflow: hidden;
-}
-
-.modal-header-custom {
-    padding: 18px 24px;
-    background: linear-gradient(135deg, #fdfbfd, #f4f0ff);
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header-custom h3 {
-    margin: 0;
-    color: #4c3b9b;
-}
-
-.btn-close-icon {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #999;
-    cursor: pointer;
-}
-
-.modal-scroll-body {
-    padding: 24px;
-    overflow-y: auto; /* Cho phép cuộn nội dung */
-    flex: 1;
-    background: #fff;
-}
-
-/* Scrollbar đẹp */
-.modal-scroll-body::-webkit-scrollbar {
-    width: 6px;
-}
-.modal-scroll-body::-webkit-scrollbar-thumb {
-    background: #e0d6ff;
-    border-radius: 3px;
-}
-/* --- CSS MỚI CHO MODAL MỞ RỘNG --- */
-
-/* 1. Cấu trúc Flex và Hiệu ứng mở rộng */
-.modal-expandable {
-    display: flex; /* Biến modal thành flex container */
-    flex-direction: row;
-    /* Chiều rộng ban đầu chỉ đủ cho phần bên trái */
-    width: 600px !important; 
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Hiệu ứng trượt mượt mà */
-    overflow: hidden; /* Ẩn phần bị tràn khi chưa mở rộng */
-}
-
-/* Class này được JS thêm vào khi bấm nút "Add Journey" */
-.modal-expandable.expanded {
-    /* Mở rộng chiều rộng để chứa cả 2 phần */
-    width: 950px !important; 
-}
-
-/* Phần bên trái (luôn hiện) */
-.modal-left-panel {
-    flex: 0 0 600px; /* Chiều rộng cố định */
-    width: 600px;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #eee;
-    background: #fff;
-    z-index: 2;
-}
-
-/* Phần bên phải (Form thêm mới) */
-.modal-right-panel {
-    flex: 0 0 350px; /* Chiều rộng cố định */
-    width: 350px;
-    background: #fbfaff; /* Màu nền hơi khác một chút */
-    display: flex;
-    flex-direction: column;
-    
-    /* Mặc định ẩn đi bằng cách dịch chuyển sang phải và làm mờ */
-    opacity: 0;
-    transform: translateX(20px);
-    transition: all 0.3s ease 0.1s; /* Delay nhẹ để phần trái mở ra trước */
-    pointer-events: none; /* Không cho tương tác khi ẩn */
-}
-
-/* Khi modal có class expanded thì hiện phần bên phải */
-.modal-expandable.expanded .modal-right-panel {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
-}
-
-/* 2. Style cho Footer bên trái (Progress & Buttons) */
-.goal-footer-section {
-    padding: 20px 24px;
-    background: #fff;
-    border-top: 1px solid #eee;
-}
-
-/* Progress Bar mới */
-.progress-bar-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #666;
-}
-.progress-track {
-    height: 12px;
-    background: #f0f0f5;
-    border-radius: 6px;
-    overflow: hidden;
-}
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6b5bff, #8e7cff); /* Màu chuyển sắc đậm */
-    border-radius: 6px;
-    transition: width 0.5s ease-out;
-}
-
-/* Hàng nút bấm */
-.modal-actions-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-    gap: 15px;
-}
-.btn-delete-goal {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 16px;
-    background: #fff0f0; color: #d32f2f;
-    border: 1px solid #ffdada; border-radius: 8px;
-    cursor: pointer; transition: all 0.2s;
-    font-weight: 500;
-}
-.btn-delete-goal:hover { background: #ffe0e0; }
-
-.btn-add-journey-expand {
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 20px;
-    background: #6b5bff; color: white;
-    border: none; border-radius: 8px;
-    cursor: pointer; transition: all 0.2s;
-    font-weight: 600; flex: 1; justify-content: center;
-    box-shadow: 0 4px 12px rgba(107, 91, 255, 0.2);
-}
-.btn-add-journey-expand:hover { background: #5a4bcf; transform: translateY(-2px); }
-
-
-/* 3. Style cho Form bên phải */
-.panel-header { padding: 18px 24px; border-bottom: 1px solid #eee; }
-.panel-header h3 { margin: 0; color: #3b2b7a; font-size: 18px; }
-.panel-body { padding: 24px; overflow-y: auto; flex: 1; }
-
-.form-group { margin-bottom: 20px; }
-.form-label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
-.form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
-.file-input { padding: 6px; background: white; }
-
-/* Mood Selection (Checkbox ẩn, hiện Label) */
-.mood-selection-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.mood-item input { display: none; } /* Ẩn checkbox thật */
-.mood-badge {
-    display: inline-block; padding: 6px 12px;
-    background: #fff; border: 1px solid #ddd; border-radius: 20px;
-    cursor: pointer; font-size: 13px; transition: all 0.2s;
-}
-/* Khi checkbox được chọn thì đổi màu label */
-.mood-item input:checked + .mood-badge {
-    background: #6b5bff; color: white; border-color: #6b5bff;
-    box-shadow: 0 2px 6px rgba(107, 91, 255, 0.2);
-}
-
-/* Slider Input */
-.slider-input { width: 100%; accent-color: #6b5bff; }
-.progress-label-group { display: flex; justify-content: space-between; margin-bottom: 5px; }
-
-/* Nút ở form phải */
-.form-actions-right { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; }
-.btn-cancel-panel { padding: 8px 16px; background: transparent; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
-.btn-save-panel { padding: 8px 20px; background: #6b5bff; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-/* --- MODAL CHI TIẾT NHẬT KÝ (TÍM THƠ THƠ) --- */
-
-.modal-entry-detail {
-    width: 800px;
-    max-width: 95%;
-    height: 500px;
-    padding: 0;
-    background: #fff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    border-radius: 20px; /* Bo tròn mềm mại */
-}
-
-.entry-detail-layout {
-    display: flex;
-    width: 100%;
-    height: 100%;
-}
-
-/* Cột Trái: Ảnh */
-.entry-left-media {
-    flex: 1.2; /* Chiếm khoảng 55% */
-    background: #f3e8ff; /* Nền tím nhạt */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-}
-
-.entry-img-full {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ảnh phủ kín khung */
-    transition: transform 0.5s;
-}
-.entry-img-full:hover { transform: scale(1.05); }
-
-.no-image-box {
-    text-align: center;
-    color: #8a7bce;
-}
-
-/* Cột Phải: Nội dung */
-.entry-right-content {
-    flex: 1; /* Chiếm 45% */
-    padding: 30px;
-    background: linear-gradient(135deg, #fff 0%, #fdfaff 100%);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-/* Header: Ngày & Mood */
-.entry-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px dashed #e0d6ff;
-    padding-bottom: 10px;
-}
-
-.entry-date {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    color: #4c3b9b;
-    font-weight: 700;
-}
-
-.entry-mood-badge {
-    background: #e9d5ff;
-    color: #6b21a8;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* Nội dung text (Cuộn nếu dài) */
-.entry-scroll-text {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    padding-right: 5px;
-}
-.entry-text-content {
-    font-size: 15px;
-    line-height: 1.6;
-    color: #444;
-    white-space: pre-line; /* Giữ xuống dòng */
-}
-
-/* Footer: Info & Nút */
-.entry-footer-info {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 15px;
-}
-.entry-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.btn-action-icon {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: 1px solid #eee;
-    background: white;
-    color: #666;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-}
-.btn-action-icon.edit:hover { background: #e9d5ff; color: #6b21a8; border-color: #d8b4fe; }
-.btn-action-icon.delete:hover { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
-
-/* Nút đóng absolute */
-.btn-close-absolute {
-    position: absolute;
-    top: 15px; right: 15px;
-    background: rgba(255,255,255,0.8);
-    border: none; width: 30px; height: 30px; border-radius: 50%;
-    font-size: 20px; color: #666; cursor: pointer;
-    z-index: 10;
-    display: flex; align-items: center; justify-content: center;
-}
-.btn-close-absolute:hover { background: white; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-/* Responsive Mobile */
-@media (max-width: 768px) {
-    .modal-entry-detail { flex-direction: column; height: auto; max-height: 90vh; overflow-y: auto; }
-    .entry-left-media { height: 200px; flex: none; }
-    .entry-right-content { flex: none; }
-}
-
-/* Edit Mode Styles */
-.btn-save-small { background: #6b5bff; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-.btn-cancel-small { background: #eee; color: #555; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-.edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
-/* --- DASHBOARD HEADER & SEARCH --- */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end; /* Căn đáy để thẳng hàng */
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.header-titles h3 {
-    margin: 0;
-    font-family: 'Playfair Display', serif;
-    color: #3b2b7a;
-    font-size: 28px;
-}
-.header-titles p {
-    margin: 5px 0 0 0;
-    font-size: 14px;
-    color: #888;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-/* Ô tìm kiếm */
-.search-wrapper {
-    position: relative;
-}
-.search-wrapper input {
-    padding: 10px 15px 10px 40px; /* Chừa chỗ cho icon */
-    border-radius: 25px;
-    border: 1px solid #e0e0e0;
-    outline: none;
-    width: 240px;
-    font-size: 14px;
-    transition: all 0.3s;
-    background: #fff;
-}
-.search-wrapper input:focus {
-    border-color: #c6a7ff;
-    box-shadow: 0 2px 8px rgba(198, 167, 255, 0.15);
-    width: 280px; /* Hiệu ứng giãn ra khi gõ */
-}
-.search-wrapper svg {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: #999;
-}
-
-/* --- TOPIC FILTERS (Viên thuốc) --- */
+/* =========================================
+   3. TOPIC FILTERS (Thanh cuộn ngang)
+   ================================********* */
 .filter-scroll-container {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    scrollbar-width: none;
+  display: flex; gap: 10px;
+  overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px;
+  scrollbar-width: none;
 }
 .filter-scroll-container::-webkit-scrollbar { display: none; }
 
 .filter-pill {
-    white-space: nowrap;
-    padding: 8px 18px;
-    border-radius: 20px;
-    border: 1px solid #eee;
-    background: #fff;
-    color: #555;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex; align-items: center;
-    transition: all 0.2s;
+  white-space: nowrap; padding: 8px 18px;
+  border-radius: 20px; border: 1px solid #eee;
+  background: #fff; color: #555;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center;
+  transition: all 0.2s;
 }
 .filter-pill:hover {
-    background: #f9f7ff;
-    border-color: #d0c4ff;
-    color: #6b5bff;
+  background: #f9f7ff; border-color: #d0c4ff; color: #6b5bff;
 }
 .filter-pill.active {
-    background: #3b2b7a; /* Màu tím đậm sang trọng */
-    color: white;
-    border-color: #3b2b7a;
-    box-shadow: 0 4px 12px rgba(59, 43, 122, 0.2);
+  background: #3b2b7a; color: white; border-color: #3b2b7a;
+  box-shadow: 0 4px 12px rgba(59, 43, 122, 0.2);
 }
 .filter-pill .dot {
-    display: inline-block; width: 8px; height: 8px;
-    border-radius: 50%; margin-right: 8px;
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 8px;
 }
 
-/* --- SECTION TITLES --- */
-.section-title {
-    color: #888;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    margin: 20px 0 12px 0;
+
+/* =========================================
+   4. GOAL CARDS (BENTO GRID STYLE) - QUAN TRỌNG
+   ================================********* */
+.goals {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Tự chia cột */
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-header { flex-direction: column; align-items: flex-start; }
-    .header-actions { width: 100%; }
-    .search-wrapper input { width: 100%; }
+.goal-card {
+  position: relative;
+  border-radius: 16px; /* Bo tròn vừa phải */
+  padding: 12px 16px;  /* Giảm padding để thẻ nhỏ gọn */
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Khoảng cách giữa các thành phần gần hơn */
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(0,0,0,0.02);
+  min-height: 70px; /* Giảm chiều cao tối thiểu */
+  
+  /* Màu nền sẽ được inline style (PHP) xử lý */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
 }
-/* --- PROFILE AVATAR (NEW) --- */
+
+.goal-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
+
+/* Icon đứng một mình (Cute style) */
+.goal-icon-standalone {
+  font-size: 22px; /* Kích thước vừa phải */
+  color: #8b8790;  /* Màu xám tím nhạt cho hợp vibe pastel */
+  flex-shrink: 0;
+}
+
+/* Thông tin Text ở giữa */
+.goal-info {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; overflow: hidden;
+}
+.goal-info h4 {
+  margin: 0 0 2px 0;
+  font-size: 14px; /* Giảm size chữ tiêu đề */
+  font-weight: 700;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Quicksand', sans-serif;
+}
+.topic-tag {
+  font-size: 11px; color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
+}
+
+/* Vòng tròn Progress bên phải */
+.circular-progress {
+  width: 52px; height: 52px;
+  border-radius: 50%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  /* Conic Gradient tạo vòng tròn */
+  background: conic-gradient(
+      rgba(0,0,0,0.15) calc(var(--p) * 1%), 
+      rgba(255,255,255,0.5) 0
+  );
+}
+.inner-circle {
+  position: absolute; width: 38px; height: 38px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 50%; z-index: 1;
+}
+.progress-value {
+  position: relative; z-index: 2;
+  font-size: 12px; font-weight: 800; color: #333;
+}
+
+.goals-footer-cta {
+  display: flex; justify-content: center; margin-top: 10px; margin-bottom: 25px;
+}
+.btn-view-all {
+  background: #fff; color: var(--muted);
+  border: 1px solid rgba(139, 135, 144, 0.1);
+  padding: 8px 18px; border-radius: 20px;
+  font-size: 14px; text-decoration: none; transition: 0.2s;
+}
+.btn-view-all:hover { color: var(--primary); border-color: var(--primary); }
+
+
+/* =========================================
+   5. TIMELINE (NHẬT KÝ)
+   ================================********* */
+.timeline {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.6));
+  padding: 18px; border-radius: 14px; box-shadow: var(--shadow);
+}
+.timeline-list { display: flex; flex-direction: column; gap: 12px; }
+
+.tl-item {
+  background: white; border-radius: 12px; padding: 12px 14px;
+  box-shadow: 0 6px 20px rgba(30, 30, 80, 0.04);
+  display: flex; gap: 12px; align-items: center; cursor: pointer;
+  transition: transform 0.2s;
+}
+.tl-item:hover { transform: translateX(5px); }
+
+.tl-body small { color: var(--muted); display: block; margin-bottom: 6px; }
+.tl-body p { margin: 0; color: #333; font-size: 14px; }
+
+
+/* =========================================
+   6. SIDEBAR (PROFILE & STATS)
+   ================================********* */
+.profile-card {
+  background: #fff; border-radius: 16px; padding: 18px;
+  text-align: center; box-shadow: var(--shadow);
+}
 .avatar-wrapper {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 15px; /* Căn giữa */
+  position: relative; width: 100px; height: 100px; margin: 0 auto 15px;
 }
-
 .profile-avatar-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%; /* Tròn vo */
-    object-fit: cover;  /* Cắt ảnh vừa khung */
-    border: 3px solid #fff;
-    box-shadow: 0 5px 15px rgba(107, 91, 255, 0.15); /* Bóng tím nhẹ */
+  width: 100%; height: 100%; border-radius: 50%;
+  object-fit: cover; border: 3px solid #fff;
+  box-shadow: 0 5px 15px rgba(107, 91, 255, 0.15);
 }
-
-/* Nút cây bút */
 .btn-edit-avatar {
-    position: absolute;
-    bottom: 5px;
-    right: 0;
-    width: 32px;
-    height: 32px;
-    background: #3b2b7a; /* Màu tím đậm sang trọng */
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: 2px solid #fff;
-    transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  position: absolute; bottom: 5px; right: 0;
+  width: 32px; height: 32px; background: #3b2b7a; color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: 2px solid #fff; transition: 0.2s;
 }
+.btn-edit-avatar:hover { background: var(--primary); transform: scale(1.1); }
 
-.btn-edit-avatar:hover {
-    background: #6b5bff;
-    transform: scale(1.1);
-}
-/* --- WEEKLY BAR CHART --- */
+.username { font-weight: 600; margin-bottom: 6px; }
+.meta { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+
+/* Thống kê nhỏ */
+.side-box { margin-top: 20px; }
+.side-box h4 { margin-bottom: 10px; font-size: 14px; color: #333; }
+.small-stat { display: flex; justify-content: space-around; background: #f9f9fc; padding: 10px; border-radius: 12px; }
+.stat { font-size: 13px; color: #666; }
+.stat strong { display: block; font-size: 16px; color: var(--primary); }
+
+/* Weekly Chart */
 .bar-chart-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end; /* Căn đáy các cột */
-    height: 100px; /* Chiều cao khu vực biểu đồ */
-    padding-top: 25px; /* Chừa chỗ cho tooltip bay lên */
-    margin-bottom: 5px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  height: 100px; padding-top: 25px; margin-bottom: 5px;
 }
-
 .bar-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    justify-content: flex-end;
-    position: relative;
-    cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; height: 100%; justify-content: flex-end;
+  position: relative; cursor: pointer;
 }
-
 .bar {
-    width: 8px; /* Độ rộng cột */
-    background: #f0f0f5; /* Màu xám nhạt (khi 0 bài) */
-    border-radius: 10px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hiệu ứng nảy */
-    position: relative;
+  width: 8px; background: #f0f0f5; border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
 }
+.bar.has-data { background: #d8b4fe; }
+.bar.today { background: var(--primary); box-shadow: 0 0 10px rgba(107, 91, 255, 0.3); }
+.bar-group:hover .bar { transform: scaleY(1.1); background: #3b2b7a; }
 
-/* Cột có dữ liệu -> Màu tím nhạt */
-.bar.has-data {
-    background: #d8b4fe; 
-}
-
-/* Cột Hôm nay -> Màu tím đậm nổi bật */
-.bar.today {
-    background: #6b5bff; 
-    box-shadow: 0 0 10px rgba(107, 91, 255, 0.3);
-}
-
-.day-label {
-    font-size: 10px;
-    color: #999;
-    margin-top: 8px;
-    text-transform: uppercase;
-}
-
-/* Hiệu ứng Hover: Cột cao lên */
-.bar-group:hover .bar {
-    transform: scaleY(1.1); 
-    background: #3b2b7a; /* Đổi màu đậm khi di chuột */
-}
-
-/* Tooltip số lượng */
 .bar-tooltip {
-    position: absolute;
-    top: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-weight: 700;
-    color: #3b2b7a;
-    opacity: 0;
-    transition: 0.2s;
-    background: white;
-    padding: 1px 4px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  font-size: 11px; font-weight: 700; color: #3b2b7a;
+  opacity: 0; transition: 0.2s; background: white;
+  padding: 1px 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.bar-group:hover .bar-tooltip { opacity: 1; top: -28px; }
+.day-label { font-size: 10px; color: #999; margin-top: 8px; text-transform: uppercase; }
+
+
+/* =========================================
+   7. MODALS (CHUNG)
+   ================================********* */
+.modal {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+.hidden { display: none !important; }
+.modal-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);
+}
+.modal-box {
+  position: relative; background: #ffffff;
+  padding: 22px; width: 360px; border-radius: 12px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.15);
+  animation: pop .22s ease-out; z-index: 1000;
+}
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-box h3 { margin-top: 0; margin-bottom: 14px; font-family: 'Playfair Display', serif; color: #3b2b7a; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.btn-cancel { padding: 8px 16px; background: #eee; border-radius: 6px; border: none; cursor: pointer; }
+.btn-save { padding: 8px 20px; background: var(--primary); color: white; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+
+
+/* =========================================
+   8. MODAL: GOAL DETAIL (EXPANDABLE)
+   ================================********* */
+.modal-large {
+  width: 600px !important; max-width: 90%; height: 80vh;
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+}
+.modal-expandable {
+  display: flex; flex-direction: row; width: 600px;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.modal-expandable.expanded { width: 950px !important; }
+
+/* Left Panel */
+.modal-left-panel {
+  flex: 0 0 600px; width: 600px; display: flex; flex-direction: column;
+  border-right: 1px solid #eee; background: #fff; z-index: 2;
+}
+.modal-header-custom {
+  padding: 18px 24px; background: linear-gradient(135deg, #fdfbfd, #f4f0ff);
+  border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+}
+.modal-scroll-body { padding: 24px; overflow-y: auto; flex: 1; }
+.goal-footer-section { padding: 20px 24px; background: #fff; border-top: 1px solid #eee; }
+
+/* Right Panel (Add Journey) */
+.modal-right-panel {
+  flex: 0 0 350px; width: 350px; background: #fbfaff;
+  display: flex; flex-direction: column;
+  opacity: 0; transform: translateX(20px); pointer-events: none;
+  transition: all 0.3s ease 0.1s;
+}
+.modal-expandable.expanded .modal-right-panel {
+  opacity: 1; transform: translateX(0); pointer-events: auto;
+}
+.panel-header { padding: 18px 24px; border-bottom: 1px solid #eee; }
+.panel-body { padding: 24px; overflow-y: auto; flex: 1; }
+
+/* Form Elements */
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; margin-bottom: 8px; font-weight: 500; }
+.form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+.mood-selection-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.mood-item input { display: none; }
+.mood-badge {
+  display: inline-block; padding: 6px 12px; background: #fff;
+  border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px;
+}
+.mood-item input:checked + .mood-badge {
+  background: var(--primary); color: white; border-color: var(--primary);
 }
 
-.bar-group:hover .bar-tooltip {
-    opacity: 1;
-    top: -28px; /* Bay lên chút nữa */
+/* Progress Bar in Modal */
+.progress-bar-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.progress-track { height: 12px; background: #f0f0f5; border-radius: 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #6b5bff, #8e7cff); transition: width 0.5s; }
+
+.modal-actions-row { display: flex; justify-content: space-between; margin-top: 20px; }
+.btn-delete-goal {
+  padding: 8px 16px; background: #fff0f0; color: #d32f2f;
+  border: 1px solid #ffdada; border-radius: 8px; cursor: pointer; display: flex; gap: 6px; align-items: center;
+}
+.btn-add-journey-expand {
+  padding: 10px 20px; background: var(--primary); color: white;
+  border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+  display: flex; gap: 6px; align-items: center;
+}
+
+
+/* =========================================
+   9. MODAL: ENTRY DETAIL
+   ================================********* */
+.modal-entry-detail {
+  width: 800px; max-width: 95%; height: 500px; padding: 0;
+  display: flex; flex-direction: row; border-radius: 20px; overflow: hidden;
+}
+.entry-left-media {
+  flex: 1.2; background: #f3e8ff; display: flex; align-items: center; justify-content: center; position: relative;
+}
+.entry-img-full { width: 100%; height: 100%; object-fit: cover; }
+.entry-right-content {
+  flex: 1; padding: 30px; background: #fff; display: flex; flex-direction: column; position: relative;
+}
+.entry-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+.entry-date { font-family: 'Playfair Display', serif; font-size: 18px; color: #4c3b9b; font-weight: 700; }
+.entry-mood-badge { background: #e9d5ff; color: #6b21a8; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+.btn-close-absolute {
+  position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
+  background: rgba(255,255,255,0.8); border-radius: 50%; border: none; cursor: pointer; z-index: 10;
 }
