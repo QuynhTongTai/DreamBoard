@@ -8,6 +8,7 @@
     </h2>
 
     <form id="capsuleForm">
+      <input type="hidden" name="moodTag" id="moodTagInput">
       <div class="form-group">
         <input type="text" name="to" placeholder="To: Future Self">
       </div>

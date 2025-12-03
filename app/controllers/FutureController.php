@@ -4,6 +4,10 @@ require_once __DIR__ . '/../models/FutureModel.php';
 class FutureController {
 
     // API: Lưu thư
+    // File: app/controllers/FutureController.php
+
+// File: app/controllers/FutureController.php
+
     public function saveLetter() {
         header('Content-Type: application/json');
         session_start();
@@ -13,15 +17,30 @@ class FutureController {
 
         $title = $_POST['subject'] ?? 'Letter to Future Self';
         $message = $_POST['message'] ?? '';
-        $date = $_POST['openDate'] ?? '';
-        $time = $_POST['openTime'] ?? '09:00';
-        $email = $_POST['email'] ?? '';
+        
+        // Nhận dữ liệu
+        $dateInput = $_POST['openDate'] ?? '';
+        $timeInput = $_POST['openTime'] ?? '09:00';
+        $email = $_POST['email'] ?? null;
         $mood = $_POST['moodTag'] ?? '';
 
-        // Gộp ngày và giờ thành datetime
-        $delivery_time = $date . ' ' . $time . ':00';
+        // --- [SỬA ĐOẠN NÀY] Xử lý Date ---
+        $delivery_time = null; // Mặc định là NULL
+
+        // Chỉ tạo ngày giờ nếu người dùng CÓ chọn ngày
+        if (!empty($dateInput)) {
+            $delivery_time = $dateInput . ' ' . $timeInput . ':00';
+        } 
+        // ---------------------------------
+
+        // Validate lại lần nữa ở server cho chắc
+        if (empty($delivery_time) && empty($mood)) {
+            echo json_encode(['status'=>'error', 'message'=>'Must have Date or Mood']);
+            exit;
+        }
 
         $model = new FutureModel();
+        // Gọi hàm createLetter (Lưu ý: Đảm bảo cột open_date trong DB cho phép NULL)
         if ($model->createLetter($user_id, $title, $message, $delivery_time, $email, $mood)) {
             echo json_encode(['status'=>'success', 'message'=>'Letter sealed successfully!']);
         } else {

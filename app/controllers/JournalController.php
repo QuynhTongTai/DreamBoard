@@ -176,18 +176,43 @@ class JournalController
 
         $model = new JournalModel();
 
-        // 1. Tạo Log mới (Vẫn lưu số % của bài viết này bình thường)
+        // 1. Tạo Log mới
         $created = $model->createLog($user_id, $goal_id, $mood, $content, $progress, $imagePath);
 
         if ($created) {
-            // 2. [SỬA ĐOẠN NÀY]: Gọi hàm tính lại Max Progress
+            // 2. Cập nhật tiến độ Goal (Max Progress)
             $newMaxProgress = $model->updateGoalProgressToMax($goal_id);
 
-            // 3. Trả về success CỘNG VỚI số % mới nhất để JS cập nhật giao diện
-            echo json_encode([
+            // --- [PHẦN MỚI] CHECK XEM CÓ THƯ TƯƠNG LAI NÀO ĐANG CHỜ KHÔNG ---
+            // Gọi hàm tìm thư dựa trên mood vừa nhập (Hàm này bạn đã thêm vào JournalModel ở bước trước)
+            $foundLetter = $model->findPendingLetterByMood($user_id, $mood);
+            
+            // Chuẩn bị dữ liệu trả về
+            $response = [
                 'status' => 'success',
-                'new_progress' => $newMaxProgress // Gửi số này về cho JS
-            ]);
+                'new_progress' => $newMaxProgress
+            ];
+
+            // Nếu tìm thấy thư
+            if ($foundLetter) {
+                // Đánh dấu thư đã mở ngay lập tức (để lần sau không hiện lại)
+                // Lưu ý: Kiểm tra cột ID trong database của bạn là 'id' hay 'letter_id' nhé. 
+                // Ở đây mình giả định là 'id'.
+                $letterId = $foundLetter['id'] ?? $foundLetter['letter_id']; 
+               // $model->markLetterAsOpened($letterId); 
+                
+                // Đính kèm nội dung thư vào JSON để JS hiển thị Popup
+                $response['letter_data'] = [
+                    'id' => $letterId,
+                    'created_at' => date('F j, Y', strtotime($foundLetter['created_at'])), // Format ngày đẹp: Nov 29, 2023
+                    'mood' => $foundLetter['mood'],
+                    'message' => $foundLetter['message'], // Nội dung thư
+                    'title' => $foundLetter['title'] ?? 'A Message from Your Past Self'
+                ];
+            }
+            // ----------------------------------------------------
+
+            echo json_encode($response);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Database Error']);
         }

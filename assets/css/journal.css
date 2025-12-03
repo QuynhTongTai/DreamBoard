@@ -440,3 +440,77 @@ body {
   position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
   background: rgba(255,255,255,0.8); border-radius: 50%; border: none; cursor: pointer; z-index: 10;
 }
+/* assets/css/journal.css - Phần Popup Thư */
+
+/* Animation Popup */
+@keyframes floatUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.letter-popup-box, .letter-content-box {
+    background: linear-gradient(135deg, #fff0f5 0%, #e6e6fa 100%); /* Pastel Pink/Purple */
+    border: 2px solid #fff;
+    box-shadow: 0 20px 50px rgba(107, 91, 255, 0.2);
+    text-align: center;
+    overflow: hidden;
+    animation: floatUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 1. NOTIFICATION STYLE */
+.letter-popup-box { width: 400px; padding: 40px 30px; border-radius: 24px; }
+
+.letter-icon-animation {
+    font-size: 48px; color: #8a6dc5; margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+.letter-title {
+    font-size: 22px; color: #4c3b9b; margin-bottom: 10px; font-weight: 700;
+}
+.letter-desc { font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 30px; }
+.highlight-mood { color: #d63031; font-weight: 700; background: #ffeaa7; padding: 2px 6px; border-radius: 4px; }
+
+.letter-actions { display: flex; justify-content: center; gap: 15px; }
+
+.btn-letter-primary {
+    background: #8a6dc5; color: white; border: none; padding: 10px 24px;
+    border-radius: 20px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(138, 109, 197, 0.4); transition: 0.2s;
+}
+.btn-letter-primary:hover { transform: scale(1.05); background: #7652be; }
+
+.btn-letter-secondary {
+    background: white; color: #888; border: 1px solid #ddd; padding: 10px 24px;
+    border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s;
+}
+.btn-letter-secondary:hover { color: #333; border-color: #999; }
+
+
+/* 2. CONTENT STYLE */
+.letter-content-box {
+    width: 550px; padding: 0; border-radius: 20px;
+    display: flex; flex-direction: column; text-align: left;
+    background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+}
+
+.letter-header {
+    padding: 25px 30px; border-bottom: 1px dashed #dcd6ff;
+    background: linear-gradient(to right, #f3e8ff, #fff0f5);
+}
+.letter-header h3 { margin: 0 0 5px 0; color: #4c3b9b; font-size: 20px; }
+.letter-meta { font-size: 12px; color: #888; display: flex; gap: 15px; }
+
+.letter-body-scroll {
+    padding: 30px; max-height: 300px; overflow-y: auto;
+    font-family: 'Quicksand', sans-serif; font-size: 15px; line-height: 1.6; color: #333;
+}
+
+.letter-footer {
+    padding: 15px 30px; border-top: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.deco-icon { font-size: 24px; color: #c6a7ff; transform: rotate(-10deg); }
+.btn-letter-close {
+    background: white; border: 1px solid #c6a7ff; color: #8a6dc5;
+    padding: 6px 18px; border-radius: 15px; cursor: pointer;
+}
+.btn-letter-close:hover { background: #8a6dc5; color: white; }

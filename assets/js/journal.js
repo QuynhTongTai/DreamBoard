@@ -348,43 +348,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Submit ADD JOURNEY
     document.addEventListener('submit', function(e) {
-        if (e.target && e.target.id === 'addJourneyForm') {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const saveBtn = form.querySelector('.btn-save-panel');
-            const originalText = saveBtn.innerText;
+    if (e.target && e.target.id === 'addJourneyForm') {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const saveBtn = form.querySelector('.btn-save-panel');
+        const originalText = saveBtn.innerText;
 
-            saveBtn.innerText = 'Saving...'; saveBtn.disabled = true;
+        saveBtn.innerText = 'Saving...';
+        saveBtn.disabled = true;
 
-            fetch('api/add_journey.php', { method: 'POST', body: formData })
+        fetch('api/add_journey.php', {
+                method: 'POST',
+                body: formData
+            })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert("Thêm thành công!");
+                    // 1. Tắt alert mặc định để trải nghiệm mượt hơn (hoặc giữ lại nếu muốn)
+                    // alert("Thêm thành công!"); 
+
                     collapseAddJourneyPanel();
                     form.reset();
-                    
-                    // Cập nhật UI
+
+                    // 2. Cập nhật UI Progress
                     const gid = document.getElementById('hiddenGoalId').value;
                     const container = document.getElementById('goalLogsContainer');
-                    
+
                     if (data.new_progress !== undefined) {
                         updateProgressUI(data.new_progress);
                         updateGoalCardUI(gid, data.new_progress);
                     }
 
+                    // 3. Load lại danh sách nhật ký
                     fetch(`api/get_goal_logs.php?goal_id=${gid}`)
-                        .then(r => r.json()).then(d => { if(d.status === 'success') renderGoalLogs(d.data, container); });
+                        .then(r => r.json()).then(d => {
+                            if (d.status === 'success') renderGoalLogs(d.data, container);
+                        });
+
+                    // --- [QUAN TRỌNG] LOGIC MỚI: KIỂM TRA & HIỆN THƯ ---
+                    // Nếu controller trả về dữ liệu thư, nghĩa là Mood này đã kích hoạt thư cũ
+                    if (data.letter_data) {
+                        showLetterNotification(data.letter_data);
+                    }
+                    // ----------------------------------------------------
 
                 } else {
                     alert("Lỗi: " + data.message);
                 }
             })
-            .finally(() => { saveBtn.innerText = originalText; saveBtn.disabled = false; });
-        }
-    });
-
+            .catch(err => {
+                console.error(err);
+                alert("Lỗi kết nối server");
+            })
+            .finally(() => {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            });
+    }
+});
     // 3. Submit EDIT ENTRY
     const editForm = document.getElementById('editEntryForm');
     if (editForm) {
@@ -559,4 +581,59 @@ function uploadAvatar(input) {
             alert("Có lỗi xảy ra: " + err.message);
         });
     }
+}
+/* =========================================
+   PHẦN 5: XỬ LÝ POPUP FUTURE LETTER
+   ================================********* */
+
+let pendingLetterContent = null; // Biến tạm lưu nội dung thư
+
+// 1. Hiện Popup thông báo (Cái hộp nhỏ xinh)
+function showLetterNotification(letterData) {
+    pendingLetterContent = letterData; // Lưu lại dữ liệu để dùng khi bấm nút "Open"
+    
+    // Điền Mood vào text thông báo
+    const notiMood = document.getElementById('notiMood');
+    if(notiMood) notiMood.innerText = letterData.mood;
+
+    // Hiện Modal
+    const modal = document.getElementById('letterNotificationModal');
+    if(modal) modal.classList.remove('hidden');
+}
+
+// 2. Đóng Popup thông báo
+function closeLetterNotification() {
+    const modal = document.getElementById('letterNotificationModal');
+    if(modal) modal.classList.add('hidden');
+}
+
+// 3. Mở thư chi tiết (Cái hộp to)
+function openFullLetter() {
+    closeLetterNotification(); // Đóng cái hộp nhỏ trước
+    
+    if(!pendingLetterContent) return;
+
+    // Điền dữ liệu vào Modal chi tiết
+    document.getElementById('letterMoodDisplay').innerText = pendingLetterContent.mood;
+    document.getElementById('letterDateDisplay').innerText = pendingLetterContent.created_at;
+    
+    // Xử lý nội dung thư: Chuyển ký tự xuống dòng (\n) thành thẻ <br> để hiển thị đẹp
+    // và dùng innerHTML để render
+    const safeContent = pendingLetterContent.message
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br>");
+        
+    document.getElementById('letterMessageContent').innerHTML = safeContent;
+
+    // Hiện Modal to
+    const modal = document.getElementById('letterContentModal');
+    if(modal) modal.classList.remove('hidden');
+}
+
+// 4. Đóng thư chi tiết
+function closeFullLetter() {
+    const modal = document.getElementById('letterContentModal');
+    if(modal) modal.classList.add('hidden');
 }

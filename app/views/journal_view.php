@@ -467,4 +467,46 @@
       </div>
     </div>
   </div>
+  <div id="letterNotificationModal" class="modal hidden" style="z-index: 2000;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box letter-popup-box">
+        <div class="letter-icon-animation">
+            <i class="ph-duotone ph-envelope-open"></i>
+        </div>
+        <h3 class="letter-title">A Message from the Past!</h3>
+        <p class="letter-desc">
+            You wrote a letter to your future self when you were <span id="notiMood" class="highlight-mood">Happy</span>! 
+            Would you like to open it now?
+        </p>
+        
+        <div class="letter-actions">
+            <button class="btn-letter-secondary" onclick="closeLetterNotification()">Maybe Later</button>
+            <button class="btn-letter-primary" onclick="openFullLetter()">Open Letter</button>
+        </div>
+    </div>
+</div>
+
+<div id="letterContentModal" class="modal hidden" style="z-index: 2100;">
+    <div class="modal-backdrop" onclick="closeFullLetter()"></div>
+    <div class="modal-box letter-content-box">
+        <div class="letter-header">
+            <h3>A Message from Your Past Self</h3>
+            <div class="letter-meta">
+                <span>Mood: <strong id="letterMoodDisplay">Happy</strong></span>
+                <span>Written: <span id="letterDateDisplay">Nov 29, 2023</span></span>
+            </div>
+        </div>
+        
+        <div class="letter-body-scroll">
+            <p id="letterMessageContent">
+                Dear Future Self,...
+            </p>
+        </div>
+
+        <div class="letter-footer">
+            <i class="ph-duotone ph-paper-plane-tilt deco-icon"></i>
+            <button class="btn-letter-close" onclick="closeFullLetter()">Close Letter</button>
+        </div>
+    </div>
+</div>
 </main>

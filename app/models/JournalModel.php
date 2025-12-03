@@ -258,5 +258,60 @@ class JournalModel
         }
         return $stats;
     }
+    // File: app/models/JournalModel.php
+
+// 1. Tìm thư đang chờ theo Mood
+// Trong file app/models/JournalModel.php
+
+public function findPendingLetterByMood($user_id, $mood_list_string) {
+    // 1. Kiểm tra đầu vào kỹ hơn
+    if (empty($mood_list_string)) return null;
+
+    $moods = array_map('trim', explode(',', $mood_list_string));
+    // Loại bỏ các phần tử rỗng (để tránh lỗi LIKE '%%' tìm ra tất cả)
+    $moods = array_filter($moods); 
+    
+    if (empty($moods)) return null;
+
+    $conditions = [];
+    $params = [':uid' => $user_id];
+    
+    foreach ($moods as $index => $m) {
+        $key = ":mood_$index";
+        // Dùng % để tìm kiếm linh hoạt (vd: 'Happy' tìm được trong 'Very Happy')
+        $conditions[] = "mood LIKE $key";
+        $params[$key] = '%' . $m . '%';
+    }
+    
+    $sqlCondition = implode(' OR ', $conditions);
+
+    // 2. Thêm try-catch để nếu lỗi SQL cũng không làm sập web (Error 500)
+    try {
+        // Lưu ý: Đảm bảo bảng future_letters có cột is_opened và open_date
+        $query = "SELECT * FROM future_letters 
+                  WHERE user_id = :uid 
+                  AND is_opened = 0 
+                  AND open_date IS NULL 
+                  AND ($sqlCondition) 
+                  ORDER BY RAND()
+                  LIMIT 1"; 
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Ghi log lỗi nếu cần, trả về null để code vẫn chạy tiếp
+        error_log("Database Error in findPendingLetterByMood: " . $e->getMessage());
+        return null; 
+    }
+}
+
+// 2. Đánh dấu thư đã mở
+public function markLetterAsOpened($letter_id) {
+    $query = "UPDATE future_letters SET is_opened = 1, open_date = NOW() WHERE letter_id = :id";
+    // Lưu ý: check lại tên cột ID trong bảng future_letters của bạn là 'id' hay 'letter_id'
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([':id' => $letter_id]);
+}
 }
 ?>
