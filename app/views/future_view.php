@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <button type="button" class="seal-btn" onclick="sealCapsule()">
+      <button type="button" class="seal-btn" >
         Seal & Send <i class="ph-bold ph-paper-plane-right"></i>
       </button>
 
