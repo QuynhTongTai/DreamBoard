@@ -76,6 +76,7 @@ body::before {
 
 /* Input & Textarea giống ảnh: Nền xám nhạt, bo tròn */
 input[type="text"], 
+input[type="email"],
 input[type="date"], 
 input[type="time"], 
 textarea {
