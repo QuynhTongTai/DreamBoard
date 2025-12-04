@@ -14,28 +14,28 @@ class JournalModel
     }
 
     public function createLog($user_id, $goal_id, $mood, $title, $content, $progress, $image = null)
-{
-    $query = "INSERT INTO " . $this->table_name . " 
+    {
+        $query = "INSERT INTO " . $this->table_name . " 
               (user_id, goal_id, mood, journey_title, content, progress_update, image, created_at) 
               VALUES (:user_id, :goal_id, :mood, :title, :content, :progress, :image, NOW())";
-    
-    $stmt = $this->conn->prepare($query);
-    
-    // Làm sạch data
-    $content = htmlspecialchars(strip_tags($content));
-    $mood = htmlspecialchars(strip_tags($mood));
-    $title = htmlspecialchars(strip_tags($title)); // Mới
 
-    $stmt->bindParam(':user_id', $user_id);
-    $stmt->bindParam(':goal_id', $goal_id);
-    $stmt->bindParam(':mood', $mood);
-    $stmt->bindParam(':title', $title); // Mới
-    $stmt->bindParam(':content', $content);
-    $stmt->bindParam(':progress', $progress);
-    $stmt->bindParam(':image', $image);
-    
-    return $stmt->execute();
-}
+        $stmt = $this->conn->prepare($query);
+
+        // Làm sạch data
+        $content = htmlspecialchars(strip_tags($content));
+        $mood = htmlspecialchars(strip_tags($mood));
+        $title = htmlspecialchars(strip_tags($title)); // Mới
+
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':goal_id', $goal_id);
+        $stmt->bindParam(':mood', $mood);
+        $stmt->bindParam(':title', $title); // Mới
+        $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':progress', $progress);
+        $stmt->bindParam(':image', $image);
+
+        return $stmt->execute();
+    }
 
     // 2.Hàm LẤY TẤT CẢ NHẬT KÝ CỦA 1 USER (Read)
     public function getLogsByUserId($user_id)
@@ -146,21 +146,24 @@ class JournalModel
     public function addGoal($user_id, $title, $topic_id)
     {
         $query = "INSERT INTO goals (user_id, title, topic_id, progress, created_at) 
-                  VALUES (:uid, :title, :topic_id, 0, NOW())";
+              VALUES (:uid, :title, :topic_id, 0, NOW())";
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
 
-        // Xử lý nếu topic_id là null (topic chung)
         if (empty($topic_id) || $topic_id === 'all') {
             $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindParam(':topic_id', $topic_id);
         }
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            // [QUAN TRỌNG] Trả về ID của goal vừa tạo
+            return $this->conn->lastInsertId();
+        }
+        return false;
     }
     // Thêm hàm này vào trong class JournalModel
     public function deleteGoal($goal_id, $user_id)
@@ -264,58 +267,62 @@ class JournalModel
     }
     // File: app/models/JournalModel.php
 
-// 1. Tìm thư đang chờ theo Mood
+    // 1. Tìm thư đang chờ theo Mood
 // Trong file app/models/JournalModel.php
 
-public function findPendingLetterByMood($user_id, $mood_list_string) {
-    // 1. Kiểm tra đầu vào kỹ hơn
-    if (empty($mood_list_string)) return null;
+    public function findPendingLetterByMood($user_id, $mood_list_string)
+    {
+        // 1. Kiểm tra đầu vào kỹ hơn
+        if (empty($mood_list_string))
+            return null;
 
-    $moods = array_map('trim', explode(',', $mood_list_string));
-    // Loại bỏ các phần tử rỗng (để tránh lỗi LIKE '%%' tìm ra tất cả)
-    $moods = array_filter($moods); 
-    
-    if (empty($moods)) return null;
+        $moods = array_map('trim', explode(',', $mood_list_string));
+        // Loại bỏ các phần tử rỗng (để tránh lỗi LIKE '%%' tìm ra tất cả)
+        $moods = array_filter($moods);
 
-    $conditions = [];
-    $params = [':uid' => $user_id];
-    
-    foreach ($moods as $index => $m) {
-        $key = ":mood_$index";
-        // Dùng % để tìm kiếm linh hoạt (vd: 'Happy' tìm được trong 'Very Happy')
-        $conditions[] = "mood LIKE $key";
-        $params[$key] = '%' . $m . '%';
-    }
-    
-    $sqlCondition = implode(' OR ', $conditions);
+        if (empty($moods))
+            return null;
 
-    // 2. Thêm try-catch để nếu lỗi SQL cũng không làm sập web (Error 500)
-    try {
-        // Lưu ý: Đảm bảo bảng future_letters có cột is_opened và open_date
-        $query = "SELECT * FROM future_letters 
+        $conditions = [];
+        $params = [':uid' => $user_id];
+
+        foreach ($moods as $index => $m) {
+            $key = ":mood_$index";
+            // Dùng % để tìm kiếm linh hoạt (vd: 'Happy' tìm được trong 'Very Happy')
+            $conditions[] = "mood LIKE $key";
+            $params[$key] = '%' . $m . '%';
+        }
+
+        $sqlCondition = implode(' OR ', $conditions);
+
+        // 2. Thêm try-catch để nếu lỗi SQL cũng không làm sập web (Error 500)
+        try {
+            // Lưu ý: Đảm bảo bảng future_letters có cột is_opened và open_date
+            $query = "SELECT * FROM future_letters 
                   WHERE user_id = :uid 
                   AND is_opened = 0 
                    
                   AND ($sqlCondition) 
                   ORDER BY RAND()
-                  LIMIT 1"; 
+                  LIMIT 1";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Ghi log lỗi nếu cần, trả về null để code vẫn chạy tiếp
-        error_log("Database Error in findPendingLetterByMood: " . $e->getMessage());
-        return null; 
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Ghi log lỗi nếu cần, trả về null để code vẫn chạy tiếp
+            error_log("Database Error in findPendingLetterByMood: " . $e->getMessage());
+            return null;
+        }
     }
-}
 
-// 2. Đánh dấu thư đã mở
-public function markLetterAsOpened($letter_id) {
-    $query = "UPDATE future_letters SET is_opened = 1, open_date = NOW() WHERE letter_id = :id";
-    // Lưu ý: check lại tên cột ID trong bảng future_letters của bạn là 'id' hay 'letter_id'
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute([':id' => $letter_id]);
-}
+    // 2. Đánh dấu thư đã mở
+    public function markLetterAsOpened($letter_id)
+    {
+        $query = "UPDATE future_letters SET is_opened = 1, open_date = NOW() WHERE letter_id = :id";
+        // Lưu ý: check lại tên cột ID trong bảng future_letters của bạn là 'id' hay 'letter_id'
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':id' => $letter_id]);
+    }
 }
 ?>

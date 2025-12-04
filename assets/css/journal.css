@@ -684,3 +684,154 @@ body {
     box-shadow: 0 4px 12px rgba(59, 43, 122, 0.3); transition: 0.2s;
 }
 .btn-add-styled:hover { transform: scale(1.05); background: #4c3b9b; }
+/* =========================================
+   NEW ADD ENTRY FORM STYLES (CUTE & PASTEL)
+   ================================********* */
+
+/* 1. Reset Panel Body padding */
+.modal-right-panel .panel-body {
+    padding: 30px;
+    background: #fdfbfd; /* Nền hồng/tím siêu nhạt */
+}
+.modal-right-panel .panel-header {
+    background: transparent;
+    border-bottom: 1px dashed #e0d0ff; /* Đường kẻ đứt đoạn nhẹ nhàng */
+    padding: 25px 30px;
+}
+.modal-right-panel .panel-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: #4c3b9b;
+}
+
+/* 2. Labels & Inputs */
+.form-label-styled {
+    display: block; margin-bottom: 10px;
+    font-size: 13px; font-weight: 700;
+    color: #8a6dc5; /* Tím nhạt */
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.form-input-styled {
+    width: 100%; padding: 14px 16px;
+    background: #ffffff;
+    border: 2px solid #f0f0f5;
+    border-radius: 16px; /* Bo tròn nhiều hơn */
+    font-family: 'Quicksand', sans-serif;
+    font-size: 14px; color: #444;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+.form-input-styled:focus {
+    outline: none;
+    border-color: #C6A7FF;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(198, 167, 255, 0.2);
+}
+.form-input-styled::placeholder { color: #ccc; font-weight: 500; }
+
+/* 3. Mood Grid (Đồng bộ Future) */
+.mood-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 cột */
+    gap: 12px;
+}
+
+.mood-radio-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; position: relative;
+    padding: 10px;
+    border-radius: 12px;
+    transition: 0.2s;
+}
+.mood-radio-item input { display: none; /* Ẩn checkbox thật */ }
+
+/* Vòng tròn Icon */
+/* Vòng tròn Icon (MẶC ĐỊNH: Màu xám nhạt sạch sẽ) */
+.mood-icon-circle {
+    width: 45px; height: 45px;
+    background: #f7f7fa; /* Nền xám rất nhạt */
+    color: #b0b0c0;      /* Icon màu xám trung tính */
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid transparent; /* Để dành chỗ cho border khi hover */
+}
+
+/* Hiệu ứng khi Hover: Hơi tím nhẹ */
+.mood-radio-item:hover .mood-icon-circle {
+    background: #fff;
+    color: #8a6dc5;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(138, 109, 197, 0.15);
+}
+
+/* KHI ĐƯỢC CHỌN (CHECKED): Chuyển thành màu Tím chủ đạo */
+.mood-radio-item input:checked + .mood-icon-circle {
+    background: #6b5bff; /* Nền tím đậm */
+    color: white;        /* Icon trắng */
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(107, 91, 255, 0.4); /* Đổ bóng tím */
+    border-color: transparent;
+}
+
+/* Chữ bên dưới khi chọn cũng đổi màu tím theo */
+.mood-radio-item input:checked ~ span {
+    color: #6b5bff; 
+    font-weight: 700;
+}
+
+/* 4. Slider Xinh */
+.range-wrapper { padding: 5px 0; }
+.styled-slider {
+    -webkit-appearance: none; width: 100%; height: 8px;
+    background: #e0d0ff; border-radius: 5px; outline: none;
+}
+.styled-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px;
+    background: #6b5bff;
+    border: 3px solid #fff;
+    border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(107, 91, 255, 0.4);
+    transition: 0.2s;
+}
+.styled-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider-value-badge {
+    color: #6b5bff; font-weight: 800; font-size: 15px;
+}
+
+/* 5. File Upload Button */
+.file-upload-styled {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px;
+    background: #fff; border: 2px dashed #C6A7FF;
+    border-radius: 12px; cursor: pointer;
+    color: #8a6dc5; font-weight: 600; font-size: 13px;
+    transition: 0.2s;
+}
+.file-upload-styled:hover { background: #f4f0ff; }
+.file-upload-styled input { display: none; }
+
+/* 6. Action Buttons */
+.form-actions-right {
+    margin-top: 30px; display: flex; gap: 12px;
+}
+.btn-save-panel {
+    flex: 1; padding: 14px;
+    background: linear-gradient(135deg, #6b5bff, #8a6dc5);
+    color: white; border: none; border-radius: 14px;
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 15px rgba(107, 91, 255, 0.3);
+    transition: 0.3s;
+}
+.btn-save-panel:hover {
+    transform: translateY(-2px); box-shadow: 0 8px 20px rgba(107, 91, 255, 0.4);
+}
+.btn-cancel-panel {
+    padding: 14px 20px; background: white; color: #888;
+    border: 1px solid #eee; border-radius: 14px; font-weight: 600; cursor: pointer;
+}
+.btn-cancel-panel:hover { background: #f9f9f9; color: #333; }

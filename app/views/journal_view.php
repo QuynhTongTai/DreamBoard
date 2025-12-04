@@ -269,9 +269,9 @@
       <div class="modal-actions" style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
         <button class="btn-cancel" onclick="closeModal()"
           style="padding:8px 16px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
-        <button class="btn-save" onclick="saveGoal()"
-          style="padding:8px 20px; background:#6b5bff; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Create
-          Goal</button>
+        <button type="button" class="btn-save" onclick="saveGoal(event)">
+          Create Goal
+        </button>
       </div>
     </div>
   </div>
@@ -323,53 +323,125 @@
 
       <div class="modal-right-panel">
         <div class="panel-header">
-          <h3>New Entry 📝</h3>
+          <h3>New Entry </h3>
         </div>
         <div class="panel-body">
           <form id="addJourneyForm">
             <input type="hidden" name="goal_id" id="hiddenGoalId" value="">
 
             <div class="form-group">
-              <label class="form-label">Title</label>
-              <input type="text" name="journey_title" class="form-input" placeholder="E.g. Finished chapter 1...">
+              <label class="form-label-styled">Title of memory</label>
+              <input type="text" name="journey_title" class="form-input-styled" placeholder="E.g. A small step today..."
+                autocomplete="off">
             </div>
 
             <div class="form-group">
-              <label class="form-label">Moods</label>
-              <div class="mood-selection-grid">
-                <label class="mood-item"><input type="checkbox" name="mood[]" value="Happy"><span class="mood-badge">😊
-                    Happy</span></label>
-                <label class="mood-item"><input type="checkbox" name="mood[]" value="Excited"><span
-                    class="mood-badge">🤩 Excited</span></label>
-                <label class="mood-item"><input type="checkbox" name="mood[]" value="Proud"><span class="mood-badge">😎
-                    Proud</span></label>
-                <label class="mood-item"><input type="checkbox" name="mood[]" value="Tired"><span class="mood-badge">😴
-                    Tired</span></label>
+              <label class="form-label-styled">How did you feel?</label>
+              <div class="mood-selector-grid">
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Happy">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-smiley"></i>
+                  </div>
+                  <span>Happy</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Excited">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-star"></i>
+                  </div>
+                  <span>Excited</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Proud">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-trophy"></i>
+                  </div>
+                  <span>Proud</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Calm">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-coffee"></i>
+                  </div>
+                  <span>Calm</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Motivated">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-lightning"></i>
+                  </div>
+                  <span>Motivated</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Creative">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-paint-brush"></i>
+                  </div>
+                  <span>Creative</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Loved">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-heart"></i>
+                  </div>
+                  <span>Loved</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Anxious">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-waves"></i>
+                  </div>
+                  <span>Anxious</span>
+                </label>
+
+                <label class="mood-radio-item">
+                  <input type="checkbox" name="mood[]" value="Sad">
+                  <div class="mood-icon-circle">
+                    <i class="ph-fill ph-cloud-rain"></i>
+                  </div>
+                  <span>Sad</span>
+                </label>
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Content</label>
-              <textarea name="content" rows="3" class="form-input" placeholder="Tell me more..."></textarea>
+              <label class="form-label-styled">What happened?</label>
+              <textarea name="content" rows="4" class="form-input-styled"
+                placeholder="Write down your thoughts..."></textarea>
             </div>
 
             <div class="form-group">
               <div class="progress-label-group">
-                <label class="form-label">Progress update</label>
-                <span id="sliderValue" style="font-weight:bold; color:#6b5bff">0%</span>
+                <label class="form-label-styled">New Progress</label>
+                <span id="sliderValue" class="slider-value-badge">0%</span>
               </div>
-              <input type="range" id="progressSlider" name="progress" min="0" max="100" value="0" class="slider-input"
-                oninput="document.getElementById('sliderValue').innerText = this.value + '%'">
+              <div class="range-wrapper">
+                <input type="range" id="progressSlider" name="progress" min="0" max="100" value="0"
+                  class="styled-slider" oninput="document.getElementById('sliderValue').innerText = this.value + '%'">
+              </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Image</label>
-              <input type="file" name="image" class="form-input file-input">
+              <label class="form-label-styled">Attach a photo</label>
+              <label class="file-upload-styled">
+                <input type="file" name="image" accept="image/*">
+                <i class="ph ph-image"></i>
+                <span>Choose an image...</span>
+              </label>
             </div>
 
             <div class="form-actions-right">
               <button type="button" class="btn-cancel-panel" onclick="collapseAddJourneyPanel()">Cancel</button>
-              <button type="submit" class="btn-save-panel">Save Entry</button>
+              <button type="submit" class="btn-save-panel">Save Entry <i
+                  class="ph-bold ph-paper-plane-right"></i></button>
             </div>
           </form>
         </div>
