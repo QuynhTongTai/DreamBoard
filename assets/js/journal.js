@@ -224,12 +224,17 @@ function renderGoalLogsNew(logs, container, themeColor) {
                 <div class="timeline-card" onclick="openEntryDetail(${logData})">
                     ${imgHtml}
                     <div class="card-content">
-                        <div class="card-mood-badge">${log.mood || 'Feeling...'}</div>
+                        
+                        <div class="card-header-row">
+                            <div class="card-mood-badge">${log.mood || 'Feeling...'}</div>
+                            <span class="card-progress-pill" style="background:${themeColor || '#C6A7FF'}">
+                                +${parseInt(log.progress_update)}%
+                            </span>
+                        </div>
+                        
                         <h4 class="card-title">${displayTitle}</h4>
                         <p class="card-desc">${log.content}</p>
-                        <span class="card-progress-pill" style="background:${themeColor || '#C6A7FF'}">
-                            +${parseInt(log.progress_update)}% Progress
-                        </span>
+                        
                     </div>
                 </div>
             </div>

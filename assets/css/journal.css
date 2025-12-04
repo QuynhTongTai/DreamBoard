@@ -648,9 +648,22 @@ body {
 }
 .card-title { font-weight: 700; font-size: 15px; color: #333; margin: 0 0 4px 0; }
 .card-desc { font-size: 13px; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.card-header-row {
+    display: flex;
+    justify-content: space-between; /* Mood trái, Progress phải */
+    align-items: center;
+    margin-bottom: 6px; /* Khoảng cách với tiêu đề bên dưới */
+}
+
+/* 2. Chỉnh lại pill Progress để bỏ margin thừa */
 .card-progress-pill {
-    margin-top: 8px; font-size: 11px; color: rgb(0, 0, 0); background: #C6A7FF;
-    padding: 2px 8px; border-radius: 10px; width: fit-content; font-weight: 600;
+    margin-top: 0 !important; /* Bỏ margin top cũ */
+    font-size: 10px; 
+    color: #333; 
+    padding: 3px 8px; 
+    border-radius: 10px; 
+    font-weight: 600;
+    line-height: 1; /* Căn giữa chữ tốt hơn */
 }
 
 /* 3. Footer Buttons */
