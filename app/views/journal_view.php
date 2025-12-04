@@ -1,5 +1,5 @@
 <!-- views/journal_view.php -->
- <script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 <main class="container">
   <section class="left-col">
 
@@ -47,35 +47,38 @@
     <div class="goals">
       <?php if (!empty($goals)): ?>
         <?php foreach ($goals as $index => $g): ?>
-          
-          <?php 
-            $bgColor = !empty($g['topic_color']) ? $g['topic_color'] : '#f9f9f9';
-            $percent = intval($g['progress']);
-            
-            // DANH SÁCH ICON "XINH XINH" (Random ngẫu nhiên)
-            $cuteIcons = [
-                'ph-fill ph-sparkle',       // Lấp lánh
-                'ph-fill ph-star',          // Ngôi sao
-                'ph-fill ph-heart',         // Trái tim
-                'ph-fill ph-flower',        // Bông hoa
-                'ph-fill ph-plant',         // Chậu cây
-                'ph-fill ph-butterfly',     // Con bướm
-                'ph-fill ph-moon-stars',    // Trăng sao
-                'ph-fill ph-coffee',        // Cốc cafe chill
-                'ph-fill ph-music-notes'    // Nốt nhạc
-            ];
-            // Chọn bừa 1 cái dựa trên ID của goal để nó cố định (không bị đổi mỗi khi F5)
-            $iconIndex = $g['goal_id'] % count($cuteIcons); 
-            $randomIconClass = $cuteIcons[$iconIndex];
+
+          <?php
+          $bgColor = !empty($g['topic_color']) ? $g['topic_color'] : '#f9f9f9';
+          $percent = intval($g['progress']);
+
+          // DANH SÁCH ICON "XINH XINH" (Random ngẫu nhiên)
+          $cuteIcons = [
+            'ph-fill ph-sparkle',       // Lấp lánh
+            'ph-fill ph-star',          // Ngôi sao
+            'ph-fill ph-heart',         // Trái tim
+            'ph-fill ph-flower',        // Bông hoa
+            'ph-fill ph-plant',         // Chậu cây
+            'ph-fill ph-butterfly',     // Con bướm
+            'ph-fill ph-moon-stars',    // Trăng sao
+            'ph-fill ph-coffee',        // Cốc cafe chill
+            'ph-fill ph-music-notes'    // Nốt nhạc
+          ];
+          // Chọn bừa 1 cái dựa trên ID của goal để nó cố định (không bị đổi mỗi khi F5)
+          $iconIndex = $g['goal_id'] % count($cuteIcons);
+          $randomIconClass = $cuteIcons[$iconIndex];
           ?>
 
-          <div class="goal-card filter-item" 
-               data-type="goal" 
-               data-topic-id="<?php echo $g['topic_id']; ?>"
-               data-search-text="<?php echo strtolower(htmlspecialchars($g['title'])); ?>"
-               id="goal-card-<?php echo $g['goal_id']; ?>"
-               onclick="openGoalDetails(<?php echo $g['goal_id']; ?>, '<?php echo htmlspecialchars($g['title']); ?>', <?php echo $percent; ?>)"
-               style="background-color: <?php echo $bgColor; ?>; <?php if ($index >= 9) echo 'display:none;'; ?>">
+          <div class="goal-card filter-item" data-type="goal" data-topic-id="<?php echo $g['topic_id']; ?>"
+            data-search-text="<?php echo strtolower(htmlspecialchars($g['title'])); ?>"
+            id="goal-card-<?php echo $g['goal_id']; ?>" onclick="openGoalDetails(
+    <?php echo $g['goal_id']; ?>, 
+    '<?php echo htmlspecialchars($g['title']); ?>', 
+    <?php echo $percent; ?>,
+    '<?php echo htmlspecialchars($g['topic_color'] ?? '#C6A7FF'); ?>', 
+    '<?php echo date('M d, Y', strtotime($g['created_at'])); ?>'
+)" style="background-color: <?php echo $bgColor; ?>; <?php if ($index >= 9)
+       echo 'display:none;'; ?>">
 
             <i class="<?php echo $randomIconClass; ?> goal-icon-standalone"></i>
 
@@ -249,10 +252,10 @@
 
       <label style="display:block; margin-bottom:8px; font-weight:500;">Topic</label>
       <div class="topic-select-wrapper" style="position:relative;">
-        
+
         <input type="text" id="goalTopicName" list="topicSuggestions" placeholder="Select or type new topic..."
-               style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        
+          style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+
         <datalist id="topicSuggestions">
           <?php if (!empty($topics)): ?>
             <?php foreach ($topics as $t): ?>
@@ -275,87 +278,79 @@
   <div id="goalDetailsModal" class="modal hidden" style="z-index: 1050;">
     <div class="modal-backdrop" onclick="closeGoalDetails()"></div>
 
-    <div class="modal-box modal-large modal-expandable" id="goalModalBox">
+    <div class="modal-box modal-large modal-expandable modern-modal" id="goalModalBox">
 
       <div class="modal-left-panel">
-        <div class="modal-header-custom">
-          <h3 id="detailGoalTitle">Goal Title</h3>
-          <button class="btn-close-icon" onclick="closeGoalDetails()">&times;</button>
-        </div>
 
-        <div class="modal-scroll-body" id="goalLogsContainer">
-          <div class="loading-spinner">Loading...</div>
-        </div>
+        <div class="goal-header-hero" id="goalHeaderHero">
+          <button class="btn-close-white" onclick="closeGoalDetails()">&times;</button>
 
-        <div class="goal-footer-section">
-          <div class="progress-bar-container">
-            <div class="progress-bar-label">
-              <span>Current Progress</span>
-              <strong id="detailGoalProgressText">0%</strong>
+          <div class="hero-content">
+            <div class="hero-info">
+              <h2 id="detailGoalTitle">Read 5 Books</h2>
+              <div class="hero-meta">
+                <span id="detailGoalDate">Created at: Nov 23, 2023</span>
+                <span id="detailGoalCount">0 entities</span>
+              </div>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="detailGoalProgressFill" style="width: 0%;"></div>
+
+            <div class="hero-progress">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle" id="heroProgressPath" stroke-dasharray="0, 100"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <text x="18" y="20.35" class="percentage" id="heroProgressText">0%</text>
+              </svg>
+              <span class="label">Progress</span>
             </div>
           </div>
+        </div>
 
-          <div class="modal-actions-row">
-            <button class="btn-delete-goal" onclick="deleteCurrentGoal()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-              Delete Goal
-            </button>
-            <button class="btn-add-journey-expand" onclick="expandAddJourneyPanel()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              Add Journey
-            </button>
-          </div>
+        <div class="modal-scroll-body timeline-container-styled" id="goalLogsContainer">
+          <div class="loading-spinner">Loading journey...</div>
+        </div>
+
+        <div class="goal-footer-actions">
+          <button class="btn-delete-styled" onclick="deleteCurrentGoal()">
+            <i class="ph ph-trash"></i> Delete Goal
+          </button>
+          <button class="btn-add-styled" onclick="expandAddJourneyPanel()">
+            <i class="ph ph-plus"></i> Add New Entry
+          </button>
         </div>
       </div>
 
       <div class="modal-right-panel">
         <div class="panel-header">
-          <h3>New Journey Entry</h3>
+          <h3>New Entry 📝</h3>
         </div>
         <div class="panel-body">
           <form id="addJourneyForm">
             <input type="hidden" name="goal_id" id="hiddenGoalId" value="">
+
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" name="journey_title" class="form-input" placeholder="E.g. Finished chapter 1...">
+            </div>
+
             <div class="form-group">
               <label class="form-label">Moods</label>
               <div class="mood-selection-grid">
-                <label class="mood-item">
-                  <input type="checkbox" name="mood[]" value="Happy">
-                  <span class="mood-badge">😊 Happy</span>
-                </label>
-                <label class="mood-item">
-                  <input type="checkbox" name="mood[]" value="Sad">
-                  <span class="mood-badge">😔 Sad</span>
-                </label>
-                <label class="mood-item">
-                  <input type="checkbox" name="mood[]" value="Excited">
-                  <span class="mood-badge">🤩 Excited</span>
-                </label>
-                <label class="mood-item">
-                  <input type="checkbox" name="mood[]" value="Tired">
-                  <span class="mood-badge">😴 Tired</span>
-                </label>
-                <label class="mood-item">
-                  <input type="checkbox" name="mood[]" value="Motivated">
-                  <span class="mood-badge">💪 Motivated</span>
-                </label>
+                <label class="mood-item"><input type="checkbox" name="mood[]" value="Happy"><span class="mood-badge">😊
+                    Happy</span></label>
+                <label class="mood-item"><input type="checkbox" name="mood[]" value="Excited"><span
+                    class="mood-badge">🤩 Excited</span></label>
+                <label class="mood-item"><input type="checkbox" name="mood[]" value="Proud"><span class="mood-badge">😎
+                    Proud</span></label>
+                <label class="mood-item"><input type="checkbox" name="mood[]" value="Tired"><span class="mood-badge">😴
+                    Tired</span></label>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Content</label>
-              <textarea name="content" rows="3" class="form-input"
-                placeholder="How was your progress today?"></textarea>
+              <textarea name="content" rows="3" class="form-input" placeholder="Tell me more..."></textarea>
             </div>
 
             <div class="form-group">
@@ -470,43 +465,43 @@
   <div id="letterNotificationModal" class="modal hidden" style="z-index: 2000;">
     <div class="modal-backdrop"></div>
     <div class="modal-box letter-popup-box">
-        <div class="letter-icon-animation">
-            <i class="ph-duotone ph-envelope-open"></i>
-        </div>
-        <h3 class="letter-title">A Message from the Past!</h3>
-        <p class="letter-desc">
-            You wrote a letter to your future self when you were <span id="notiMood" class="highlight-mood">Happy</span>! 
-            Would you like to open it now?
-        </p>
-        
-        <div class="letter-actions">
-            <button class="btn-letter-secondary" onclick="closeLetterNotification()">Maybe Later</button>
-            <button class="btn-letter-primary" onclick="openFullLetter()">Open Letter</button>
-        </div>
-    </div>
-</div>
+      <div class="letter-icon-animation">
+        <i class="ph-duotone ph-envelope-open"></i>
+      </div>
+      <h3 class="letter-title">A Message from the Past!</h3>
+      <p class="letter-desc">
+        You wrote a letter to your future self when you were <span id="notiMood" class="highlight-mood">Happy</span>!
+        Would you like to open it now?
+      </p>
 
-<div id="letterContentModal" class="modal hidden" style="z-index: 2100;">
+      <div class="letter-actions">
+        <button class="btn-letter-secondary" onclick="closeLetterNotification()">Maybe Later</button>
+        <button class="btn-letter-primary" onclick="openFullLetter()">Open Letter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="letterContentModal" class="modal hidden" style="z-index: 2100;">
     <div class="modal-backdrop" onclick="closeFullLetter()"></div>
     <div class="modal-box letter-content-box">
-        <div class="letter-header">
-            <h3>A Message from Your Past Self</h3>
-            <div class="letter-meta">
-                <span>Mood: <strong id="letterMoodDisplay">Happy</strong></span>
-                <span>Written: <span id="letterDateDisplay">Nov 29, 2023</span></span>
-            </div>
+      <div class="letter-header">
+        <h3>A Message from Your Past Self</h3>
+        <div class="letter-meta">
+          <span>Mood: <strong id="letterMoodDisplay">Happy</strong></span>
+          <span>Written: <span id="letterDateDisplay">Nov 29, 2023</span></span>
         </div>
-        
-        <div class="letter-body-scroll">
-            <p id="letterMessageContent">
-                Dear Future Self,...
-            </p>
-        </div>
+      </div>
 
-        <div class="letter-footer">
-            <i class="ph-duotone ph-paper-plane-tilt deco-icon"></i>
-            <button class="btn-letter-close" onclick="closeFullLetter()">Close Letter</button>
-        </div>
+      <div class="letter-body-scroll">
+        <p id="letterMessageContent">
+          Dear Future Self,...
+        </p>
+      </div>
+
+      <div class="letter-footer">
+        <i class="ph-duotone ph-paper-plane-tilt deco-icon"></i>
+        <button class="btn-letter-close" onclick="closeFullLetter()">Close Letter</button>
+      </div>
     </div>
-</div>
+  </div>
 </main>

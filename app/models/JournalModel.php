@@ -13,25 +13,29 @@ class JournalModel
         $this->conn = $database->connect();
     }
 
-    public function createLog($user_id, $goal_id, $mood, $content, $progress, $image = null)
-    {
-        //:user_id, :goal_id, ...: Đây là các Chỗ giữ chỗ có tên (Named Placeholders). Chúng đóng vai trò là "biến" an toàn trong câu lệnh SQL. Đây là cơ chế chính của Prepared Statements chống SQL Injection.
-        $query = "INSERT INTO " . $this->table_name . " 
-                  (user_id, goal_id, mood, content, progress_update, image) 
-                  VALUES (:user_id, :goal_id, :mood, :content, :progress, :image)";
-        $stmt = $this->conn->prepare($query);
-        //Làm sạch dữ liệu ($content, $mood)
-        $content = htmlspecialchars(strip_tags($content));
-        $mood = htmlspecialchars(strip_tags($mood));
-        //Phương thức này gắn giá trị của biến PHP vào chỗ giữ chỗ tương ứng trong câu lệnh SQL.
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':goal_id', $goal_id);
-        $stmt->bindParam(':mood', $mood);
-        $stmt->bindParam(':content', $content);
-        $stmt->bindParam(':progress', $progress);
-        $stmt->bindParam(':image', $image);
-        return $stmt->execute();
-    }
+    public function createLog($user_id, $goal_id, $mood, $title, $content, $progress, $image = null)
+{
+    $query = "INSERT INTO " . $this->table_name . " 
+              (user_id, goal_id, mood, journey_title, content, progress_update, image, created_at) 
+              VALUES (:user_id, :goal_id, :mood, :title, :content, :progress, :image, NOW())";
+    
+    $stmt = $this->conn->prepare($query);
+    
+    // Làm sạch data
+    $content = htmlspecialchars(strip_tags($content));
+    $mood = htmlspecialchars(strip_tags($mood));
+    $title = htmlspecialchars(strip_tags($title)); // Mới
+
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->bindParam(':goal_id', $goal_id);
+    $stmt->bindParam(':mood', $mood);
+    $stmt->bindParam(':title', $title); // Mới
+    $stmt->bindParam(':content', $content);
+    $stmt->bindParam(':progress', $progress);
+    $stmt->bindParam(':image', $image);
+    
+    return $stmt->execute();
+}
 
     // 2.Hàm LẤY TẤT CẢ NHẬT KÝ CỦA 1 USER (Read)
     public function getLogsByUserId($user_id)
@@ -291,7 +295,7 @@ public function findPendingLetterByMood($user_id, $mood_list_string) {
         $query = "SELECT * FROM future_letters 
                   WHERE user_id = :uid 
                   AND is_opened = 0 
-                  AND open_date IS NULL 
+                   
                   AND ($sqlCondition) 
                   ORDER BY RAND()
                   LIMIT 1"; 

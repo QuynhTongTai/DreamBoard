@@ -150,6 +150,7 @@ class JournalController
         // Lấy dữ liệu từ Form
         $user_id = $_SESSION['user_id'];
         $goal_id = $_POST['goal_id'];
+        $title   = $_POST['journey_title'] ?? '';
         $content = $_POST['content'] ?? '';
         $progress = $_POST['progress'] ?? 0;
 
@@ -177,7 +178,7 @@ class JournalController
         $model = new JournalModel();
 
         // 1. Tạo Log mới
-        $created = $model->createLog($user_id, $goal_id, $mood, $content, $progress, $imagePath);
+        $created = $model->createLog($user_id, $goal_id, $mood, $title, $content, $progress, $imagePath);
 
         if ($created) {
             // 2. Cập nhật tiến độ Goal (Max Progress)
