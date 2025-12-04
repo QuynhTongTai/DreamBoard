@@ -121,32 +121,68 @@
       </div>
     </div>
     <h4 class="section-title">Journey Timeline</h4>
-    <div class="timeline">
-      <div class="timeline-list">
-        <?php if (!empty($logs)): ?>
-          <?php foreach ($logs as $log): ?>
-            <div class="tl-item filter-item" data-type="log" data-topic-id="<?php echo $log['topic_id'] ?? 0; ?>"
-              data-search-text="<?php echo strtolower(htmlspecialchars($log['content'] . ' ' . $log['goal_title'])); ?>"
-              onclick="openEntryDetail(<?php echo htmlspecialchars(json_encode($log)); ?>)">
 
-              <div class="tl-body">
-                <small><?php echo date('M d, Y', strtotime($log['created_at'])); ?> —
-                  <strong><?php echo htmlspecialchars($log['goal_title'] ?: 'General'); ?></strong></small>
-                <p><?php echo nl2br(htmlspecialchars($log['content'])); ?></p>
-                <?php if (!empty($log['image'])): ?>
-                  <div style="margin-top:8px"><img src="<?php echo htmlspecialchars($log['image']); ?>" alt=""
-                      style="max-width:160px;border-radius:8px"></div>
-                <?php endif; ?>
-              </div>
-              <div style="margin-left:auto;text-align:right">
-                <div style="font-weight:600;color:#6b5bff"><?php echo intval($log['progress_update']); ?>%</div>
-                <div style="color:var(--muted);font-size:12px"><?php echo htmlspecialchars($log['mood']); ?></div>
-              </div>
+    <div class="main-timeline-section">
+      <?php if (!empty($logs)): ?>
+        <?php
+        // 1. Nhóm các log theo ngày trước khi loop
+        // Kết quả mong muốn: [ 'Dec 04, 2025' => [log1, log2], 'Dec 03' => [log3] ]
+        $groupedLogs = [];
+        foreach ($logs as $log) {
+          $dateKey = date('M d, Y', strtotime($log['created_at']));
+          $groupedLogs[$dateKey][] = $log;
+        }
+        ?>
+
+        <?php foreach ($groupedLogs as $date => $dayLogs): ?>
+
+          <div class="timeline-date-group">
+            <div class="timeline-date-dot"></div>
+            <div class="timeline-date-label"><?php echo $date; ?></div>
+
+            <div class="timeline-items-grid">
+
+              <?php foreach ($dayLogs as $log): ?>
+                <div class="journey-card-item filter-item" data-type="log"
+                  data-topic-id="<?php echo $log['topic_id'] ?? 0; ?>"
+                  data-search-text="<?php echo strtolower(htmlspecialchars($log['content'] . ' ' . $log['goal_title'])); ?>"
+                  onclick="openEntryDetail(<?php echo htmlspecialchars(json_encode($log)); ?>)">
+
+                  <div class="j-card-img">
+                    <?php if (!empty($log['image'])): ?>
+                      <img src="<?php echo htmlspecialchars($log['image']); ?>" alt="img">
+                    <?php else: ?>
+                      <span>📝</span>
+                    <?php endif; ?>
+                  </div>
+
+                  <div class="j-card-content">
+                    <h4 class="j-card-title">
+                      <?php echo !empty($log['journey_title']) ? htmlspecialchars($log['journey_title']) : htmlspecialchars($log['content']); ?>
+                    </h4>
+                    <span class="j-card-meta">
+                      Goal: <strong><?php echo htmlspecialchars($log['goal_title'] ?: 'General'); ?></strong>
+                    </span>
+                  </div>
+
+                  <div class="j-card-actions">
+                    <span class="j-pill-progress">+<?php echo intval($log['progress_update']); ?>%</span>
+                    <span class="j-pill-mood"><?php echo htmlspecialchars($log['mood']); ?></span>
+                  </div>
+
+                </div>
+              <?php endforeach; ?>
 
             </div>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </div>
+          </div>
+
+        <?php endforeach; ?>
+
+      <?php else: ?>
+        <div style="padding: 40px; text-align: center; color: #999;">
+          <p>No journey entries yet. Start writing your story!</p>
+        </div>
+      <?php endif; ?>
     </div>
 
   </section>
@@ -454,83 +490,83 @@
 
     <div class="modal-box modal-entry-detail">
 
-      <button class="btn-close-absolute" onclick="closeEntryDetail()">&times;</button>
+      <button class="btn-close-absolute" onclick="closeEntryDetail()">
+        <i class="ph ph-x"></i>
+      </button>
 
-      <div class="entry-detail-layout">
+      <div class="entry-split-media">
+        <img id="detailEntryImg" src="" alt="Memory" class="entry-img-cover" style="display: none;">
 
-        <div class="entry-left-media" id="entryImageArea">
-          <img id="detailEntryImg" src="" alt="Journal Image" class="entry-img-full">
-          <div id="noImagePlaceholder" class="no-image-box">
-            <span style="font-size: 40px;">📔</span>
-            <p>No photo for this memory</p>
+        <div id="detailNoImage" class="media-placeholder">
+          <i class="ph-duotone ph-image"></i>
+          <span>No image attached</span>
+        </div>
+      </div>
+
+      <div class="entry-split-content">
+
+        <div id="viewModeContent">
+          <div class="split-header">
+            <span class="split-label">The Journey Log</span>
+            <h2 id="detailEntryTitle" class="split-title">Title Here</h2>
+
+            <div class="split-meta">
+              <span id="detailEntryDate" class="meta-date">Date Here</span>
+              <div class="meta-badge">
+                <i class="ph-fill ph-smiley"></i>
+                <span id="detailEntryMood">Happy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="split-body" id="detailEntryText">
+            Content goes here...
+          </div>
+
+          <div class="split-footer">
+            <div class="progress-indicator">
+              Progress: <span id="detailEntryProgress">+0%</span>
+            </div>
+
+            <div class="action-group">
+              <button class="btn-circle edit" onclick="toggleEditMode(true)" title="Edit">
+                <i class="ph ph-pencil-simple"></i>
+              </button>
+              <button class="btn-circle delete" onclick="deleteEntryCurrent()" title="Delete">
+                <i class="ph ph-trash"></i>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="entry-right-content">
+        <div id="editModeContent" class="hidden">
+          <h3 style="margin:0 0 20px 0; color:#4c3b9b; font-family:'Playfair Display', serif;">Edit Memory ✏️</h3>
+          <form id="editEntryForm">
+            <input type="hidden" id="editEntryId" name="log_id">
+            <input type="hidden" id="editGoalId" name="goal_id">
 
-          <div id="viewModeContent">
-            <div class="entry-header">
-              <span class="entry-date" id="detailEntryDate">Nov 28, 2025</span>
-              <div class="entry-mood-badge" id="detailEntryMood">😊 Happy</div>
+            <div class="form-group">
+              <label class="form-label-styled">What happened?</label>
+              <textarea name="content" id="editContentInput" rows="8" class="form-input-styled"></textarea>
             </div>
 
-            <div class="entry-scroll-text">
-              <p id="detailEntryText" class="entry-text-content">Nội dung nhật ký...</p>
+            <div class="form-group">
+              <label class="form-label-styled">Mood</label>
+              <input type="text" name="mood" id="editMoodInput" class="form-input-styled">
             </div>
 
-            <div class="entry-footer-info">
-              <div class="progress-mini-info">
-                <span>Progress at this moment:</span>
-                <strong id="detailEntryProgress">60%</strong>
-              </div>
+            <div class="form-group">
+              <label class="form-label-styled">Progress (%)</label>
+              <input type="number" name="progress" id="editProgressInput" class="form-input-styled" min="0" max="100">
             </div>
 
-            <div class="entry-actions">
-              <button class="btn-action-icon delete" onclick="deleteEntryCurrent()" title="Delete">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-              <button class="btn-action-icon edit" onclick="toggleEditMode(true)" title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel-panel" onclick="toggleEditMode(false)">Cancel</button>
+              <button type="submit" class="btn-save-panel" style="width: auto;">Save Update</button>
             </div>
-          </div>
-
-          <div id="editModeContent" class="hidden">
-            <h3 style="margin:0 0 15px 0; color:#4c3b9b;">Edit Entry ✏️</h3>
-            <form id="editEntryForm">
-              <input type="hidden" id="editEntryId" name="log_id">
-              <input type="hidden" id="editGoalId" name="goal_id">
-              <div class="form-group">
-                <label>Content</label>
-                <textarea name="content" id="editContentInput" rows="5" class="form-input"></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>Mood</label>
-                <input type="text" name="mood" id="editMoodInput" class="form-input" placeholder="e.g. Happy, Tired...">
-              </div>
-
-              <div class="form-group">
-                <label>Progress (%)</label>
-                <input type="number" name="progress" id="editProgressInput" class="form-input" min="0" max="100">
-              </div>
-
-              <div class="edit-actions">
-                <button type="button" class="btn-cancel-small" onclick="toggleEditMode(false)">Cancel</button>
-                <button type="submit" class="btn-save-small">Save Changes</button>
-              </div>
-            </form>
-          </div>
-
+          </form>
         </div>
+
       </div>
     </div>
   </div>
@@ -574,6 +610,12 @@
         <i class="ph-duotone ph-paper-plane-tilt deco-icon"></i>
         <button class="btn-letter-close" onclick="closeFullLetter()">Close Letter</button>
       </div>
+    </div>
+  </div>
+  <div id="imageLightbox" class="modal hidden" style="z-index: 9999;" onclick="closeFullImage()">
+    <div class="lightbox-content">
+      <img id="lightboxImg" src="" alt="Full Size">
+      <button class="btn-close-lightbox">&times;</button>
     </div>
   </div>
 </main>

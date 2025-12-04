@@ -205,9 +205,7 @@ function renderGoalLogsNew(logs, container, themeColor) {
         container.innerHTML = `<div style="text-align:center;padding:50px;color:#aaa;">
             <i class="ph ph-notebook" style="font-size:40px;margin-bottom:10px;display:block"></i>
             <p>Start your journey by adding the first entry!</p>
-            <button class="btn-add-journey-expand" onclick="expandAddJourneyPanel()" style="margin-top:15px;">
-                + Add First Entry
-            </button>
+            
         </div>`;
         return;
     }
@@ -369,28 +367,45 @@ function openEntryDetail(log) {
     if (modal) modal.classList.remove('hidden');
     toggleEditMode(false);
 
-    // View Mode
+    // 1. Data Text
     const dateStr = new Date(log.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('detailEntryDate').innerText = dateStr;
+    
+    // Title logic
+    const displayTitle = log.journey_title ? log.journey_title : 'Journey Entry';
+    document.getElementById('detailEntryTitle').innerText = displayTitle;
+
     document.getElementById('detailEntryMood').innerText = log.mood || 'Feeling good';
     document.getElementById('detailEntryText').innerText = log.content;
-    document.getElementById('detailEntryProgress').innerText = log.progress_update + '%';
+    document.getElementById('detailEntryProgress').innerText = '+' + log.progress_update + '%';
 
+    // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH (LOGIC MỚI)
+    const mediaColumn = document.querySelector('.entry-split-media'); 
     const imgTag = document.getElementById('detailEntryImg');
-    const ph = document.getElementById('noImagePlaceholder');
+
     if (log.image) {
-        imgTag.src = log.image; imgTag.style.display = 'block'; ph.style.display = 'none';
+        mediaColumn.style.display = 'flex'; 
+        imgTag.src = log.image;
+        imgTag.style.display = 'block';
+        
+        // --- THÊM DÒNG NÀY: Bấm vào ảnh để phóng to ---
+        imgTag.onclick = function() {
+            openFullImage(this.src);
+        };
+        // ----------------------------------------------
+        
+        const noImgDiv = document.getElementById('detailNoImage');
+        if(noImgDiv) noImgDiv.style.display = 'none';
     } else {
-        imgTag.style.display = 'none'; ph.style.display = 'block';
+        mediaColumn.style.display = 'none'; 
     }
 
-    // Edit Form - Fill Data
+    // 3. Fill Form Edit
     document.getElementById('editEntryId').value = log.log_id;
     const editGoalInput = document.getElementById('editGoalId');
     if (editGoalInput) {
         editGoalInput.value = log.goal_id || document.getElementById('hiddenGoalId').value;
     }
-
     document.getElementById('editContentInput').value = log.content;
     document.getElementById('editMoodInput').value = log.mood;
     document.getElementById('editProgressInput').value = log.progress_update;
@@ -706,4 +721,20 @@ function openFullLetter() {
 function closeFullLetter() {
     const modal = document.getElementById('letterContentModal');
     if (modal) modal.classList.add('hidden');
+}
+// --- LIGHTBOX FUNCTIONS ---
+function openFullImage(src) {
+    const lightbox = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    if (lightbox && img) {
+        img.src = src;
+        lightbox.classList.remove('hidden');
+    }
+}
+
+function closeFullImage() {
+    const lightbox = document.getElementById('imageLightbox');
+    if (lightbox) {
+        lightbox.classList.add('hidden');
+    }
 }

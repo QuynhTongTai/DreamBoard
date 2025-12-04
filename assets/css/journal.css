@@ -420,25 +420,133 @@ body {
 
 
 /* =========================================
-   9. MODAL: ENTRY DETAIL
+   9. MODAL: ENTRY DETAIL (SPLIT LAYOUT - MAGAZINE STYLE)
    ================================********* */
+
+/* 1. Khung Modal Chính */
 .modal-entry-detail {
-  width: 800px; max-width: 95%; height: 500px; padding: 0;
-  display: flex; flex-direction: row; border-radius: 20px; overflow: hidden;
+    width: 900px !important; /* Mở rộng chiều ngang */
+    max-width: 95%;
+    height: 600px; /* Chiều cao cố định để ảnh đẹp */
+    padding: 0 !important; /* Xóa padding để ảnh tràn viền */
+    background: #fff !important;
+    border-radius: 24px !important;
+    display: flex;
+    flex-direction: row; /* Chia đôi trái phải */
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden; /* Cắt góc ảnh */
 }
-.entry-left-media {
-  flex: 1.2; background: #f3e8ff; display: flex; align-items: center; justify-content: center; position: relative;
-}
-.entry-img-full { width: 100%; height: 100%; object-fit: cover; }
-.entry-right-content {
-  flex: 1; padding: 30px; background: #fff; display: flex; flex-direction: column; position: relative;
-}
-.entry-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-.entry-date { font-family: 'Playfair Display', serif; font-size: 18px; color: #4c3b9b; font-weight: 700; }
-.entry-mood-badge { background: #e9d5ff; color: #6b21a8; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+
+/* Nút Close (X) - Đặt bên phải */
 .btn-close-absolute {
-  position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
-  background: rgba(255,255,255,0.8); border-radius: 50%; border: none; cursor: pointer; z-index: 10;
+    position: absolute; top: 20px; right: 20px;
+    width: 36px; height: 36px;
+    background: #f8f8fa; color: #666; border: none; border-radius: 50%;
+    cursor: pointer; font-size: 18px; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.2s;
+}
+.btn-close-absolute:hover { background: #ffebeb; color: #ff6b6b; transform: rotate(90deg); }
+
+/* --- CỘT TRÁI: ẢNH MEDIA (40%) --- */
+.entry-split-media {
+    flex: 0 0 40%; /* Chiếm 40% chiều rộng */
+    background-color: #f4f0ff; /* Màu nền nếu không có ảnh */
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+
+/* Ảnh tràn viền */
+.entry-img-cover {
+    width: 100%; height: 100%;
+    object-fit: cover; /* Đảm bảo ảnh luôn đẹp, không méo */
+    transition: transform 0.5s ease;
+}
+.entry-split-media:hover .entry-img-cover { transform: scale(1.05); }
+
+/* Placeholder khi không có ảnh */
+.media-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #c6a7ff; text-align: center; padding: 20px;
+}
+.media-placeholder i { font-size: 64px; margin-bottom: 15px; opacity: 0.5; }
+.media-placeholder span { font-size: 14px; font-weight: 600; opacity: 0.8; }
+
+
+/* --- CỘT PHẢI: NỘI DUNG (60%) --- */
+.entry-split-content {
+    flex: 1; /* Chiếm phần còn lại */
+    padding: 40px;
+    display: flex; flex-direction: column;
+    overflow-y: auto; /* Cho phép cuộn nội dung bên phải */
+    position: relative;
+}
+
+/* Header */
+.split-header { margin-bottom: 20px; }
+.split-label {
+    font-size: 11px; font-weight: 800; color: #8a6dc5;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 10px; display: block;
+}
+.split-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700; color: #2d3436;
+    line-height: 1.2; margin: 0 0 12px 0;
+}
+
+/* Meta Row (Date & Mood) */
+.split-meta {
+    display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
+    padding-bottom: 20px; border-bottom: 1px dashed #eee;
+}
+.meta-date { font-size: 13px; color: #888; font-weight: 500; }
+.meta-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff8e1; color: #d35400; /* Màu cam nhẹ */
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+}
+
+/* Body Text */
+.split-body {
+    flex: 1; /* Đẩy footer xuống đáy */
+    font-family: 'Quicksand', sans-serif;
+    font-size: 15px; line-height: 1.8; color: #444;
+    white-space: pre-line; margin-top: 20px;
+}
+
+/* Footer Actions */
+.split-footer {
+    margin-top: 30px; padding-top: 20px;
+    border-top: 1px solid #f0f0f5;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.progress-indicator {
+    font-size: 12px; font-weight: 700; color: #6b5bff;
+    background: #f3e8ff; padding: 6px 12px; border-radius: 8px;
+}
+
+.action-group { display: flex; gap: 10px; }
+.btn-circle {
+    width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    transition: 0.2s;
+}
+.btn-circle.edit { background: #f0f0f5; color: #6b5bff; }
+.btn-circle.edit:hover { background: #6b5bff; color: white; }
+
+.btn-circle.delete { background: #fff0f0; color: #ff6b6b; }
+.btn-circle.delete:hover { background: #ff6b6b; color: white; }
+
+/* EDIT MODE FORM (Đè lên cột phải) */
+#editModeContent {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: #fff; padding: 40px; z-index: 10;
+    overflow-y: auto;
 }
 /* assets/css/journal.css - Phần Popup Thư */
 
@@ -835,3 +943,184 @@ body {
     border: 1px solid #eee; border-radius: 14px; font-weight: 600; cursor: pointer;
 }
 .btn-cancel-panel:hover { background: #f9f9f9; color: #333; }
+/* =========================================
+   10. TIMELINE GRID STYLE (Professional & Clean)
+   ================================********* */
+
+/* 1. Container bao quanh toàn bộ Timeline */
+.main-timeline-section {
+    position: relative;
+    padding-left: 40px; /* Chừa lề trái cho đường kẻ dọc */
+    margin-top: 30px;
+}
+
+/* Đường kẻ dọc nét đứt xuyên suốt */
+.main-timeline-section::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    bottom: 0;
+    left: 14px; /* Căn chỉnh chính xác với tâm vòng tròn */
+    width: 2px;
+    border-left: 2px dashed #dcd6ff; /* Nét đứt màu tím nhạt */
+    z-index: 0;
+}
+
+/* 2. Nhóm theo ngày (Date Group) */
+.timeline-date-group {
+    position: relative;
+    margin-bottom: 35px; /* Khoảng cách giữa các ngày */
+}
+
+/* Dấu chấm tròn to đánh dấu NGÀY */
+.timeline-date-dot {
+    position: absolute;
+    left: -33px; /* (40px padding - 14px center) chỉnh cho trùng đường kẻ */
+    top: 0;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border: 3px solid #6b5bff; /* Viền tím đậm */
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 0 4px #fbf7ff; /* Viền giả trùng màu nền để cắt đường kẻ */
+    transition: all 0.3s ease;
+}
+
+/* Tiêu đề ngày tháng */
+.timeline-date-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #4c3b9b;
+    margin-bottom: 15px;
+    line-height: 1;
+    display: flex; align-items: center;
+}
+
+/* 3. Lưới chứa các bài viết (2 cột) */
+.timeline-items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Chia 2 cột đều nhau */
+    gap: 15px; /* Khoảng cách giữa các thẻ */
+}
+
+/* Responsive: Màn hình nhỏ thì về 1 cột */
+@media (max-width: 768px) {
+    .timeline-items-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 4. Thẻ bài viết (Journey Card) */
+.journey-card-item {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng Hover */
+.journey-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(107, 91, 255, 0.15);
+    border-color: #dcd6ff;
+}
+
+
+
+/* Ảnh thumbnail vuông */
+.j-card-img {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #f3f0ff;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+.j-card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Nội dung */
+.j-card-content { flex: 1; overflow: hidden; min-width: 0; }
+
+.j-card-title {
+    font-size: 14px; font-weight: 700; color: #333;
+    margin: 0 0 3px 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.j-card-meta {
+    font-size: 11px; color: #888;
+    display: flex; align-items: center; gap: 5px;
+}
+.j-card-meta strong { color: #6b5bff; font-weight: 600; }
+
+/* Mood & Progress (Gọn gàng bên phải) */
+.j-card-actions {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    flex-shrink: 0;
+}
+.j-pill-progress {
+    font-size: 10px; font-weight: 800; color: #6b5bff;
+    background: #f3e8ff; padding: 2px 6px; border-radius: 6px;
+}
+.j-pill-mood {
+    font-size: 10px; color: #999;
+}
+/* =========================================
+   11. IMAGE LIGHTBOX (Xem ảnh to)
+   ================================********* */
+#imageLightbox {
+    background: rgba(0, 0, 0, 0.9); /* Nền đen đậm */
+    backdrop-filter: blur(5px);
+    cursor: zoom-out; /* Con trỏ hình kính lúp thu nhỏ */
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#lightboxImg {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    object-fit: contain;
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.btn-close-lightbox {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+.btn-close-lightbox:hover { opacity: 1; }
+
+/* Thêm hiệu ứng con trỏ cho ảnh trong modal chi tiết */
+.entry-img-cover {
+    cursor: zoom-in; /* Báo hiệu có thể bấm vào */
+}
