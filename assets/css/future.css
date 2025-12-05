@@ -251,3 +251,62 @@ textarea {
     transition: 0.3s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
+/* --- RESPONSIVE (Dán đè vào cuối file future.css) --- */
+
+/* 1. Tablet & Mobile (Màn hình dưới 900px) */
+@media (max-width: 900px) {
+    .container {
+        grid-template-columns: 1fr; /* Chuyển thành 1 cột dọc */
+        gap: 30px;
+        margin: 20px auto; /* Giảm lề ngoài */
+    }
+
+    .card {
+        padding: 25px; /* Giảm padding thẻ cho đỡ tốn diện tích */
+    }
+
+    /* Đảm bảo mood grid vẫn giữ 3 cột cho đẹp (3x3 = 9 moods) */
+    .mood-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+/* 2. Mobile nhỏ (Màn hình dưới 480px - Điện thoại dọc) */
+@media (max-width: 480px) {
+    /* Title nhỏ lại chút */
+    .capsule-title {
+        font-size: 24px;
+        flex-direction: column; /* Icon lên trên chữ */
+        align-items: flex-start;
+    }
+
+    /* Xử lý dòng Ngày/Giờ: Xuống dòng thay vì nằm ngang */
+    .date-row {
+        flex-direction: column; 
+        gap: 10px;
+    }
+    
+    .date-row > div {
+        width: 100%;
+    }
+
+    /* Thu nhỏ Mood Icon để không bị tràn */
+    .mood-circle {
+        width: 55px;  /* Gốc là 60-70px, giảm xuống */
+        height: 55px;
+        font-size: 24px; /* Icon nhỏ lại */
+    }
+    
+    .mood-name {
+        font-size: 11px;
+    }
+
+    /* Tăng font input lên 16px để iOS không tự zoom khi gõ */
+    input[type="text"], 
+    input[type="email"],
+    textarea {
+        font-size: 16px; 
+        padding: 12px;
+    }
+}

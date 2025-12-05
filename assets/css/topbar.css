@@ -16,32 +16,28 @@
   box-shadow: var(--shadow);
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 1000; /* Tăng z-index để luôn nổi lên trên */
   backdrop-filter: blur(6px);
 }
 
-.nav-left, .nav-right {
+.nav-left {
   display: flex;
   align-items: center;
-  gap: 18px;
 }
 
 /* Logo */
 .logo img {
-  height: 58px;
+  height: 48px; /* Giảm nhẹ để cân đối */
   width: auto;
 }
 
-.logo a {
+/* Menu Desktop */
+nav {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
+  gap: 6px;
+  margin-left: 20px;
 }
 
-/* Menu */
 .nav-item {
   color: var(--muted);
   text-decoration: none;
@@ -49,6 +45,7 @@
   padding: 8px 12px;
   border-radius: 10px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
@@ -62,18 +59,53 @@
   box-shadow: 0 4px 12px rgba(60, 50, 180, 0.05);
 }
 
-/* Nút */
+/* Khu vực bên phải */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  padding: 2px;
+  background: linear-gradient(135deg, #C6A7FF, #FFD8C3);
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5b4daa;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Nút chung */
 .btn-ghost {
   border: 1px solid rgba(60, 60, 60, 0.08);
   background: white;
-  padding: 8px 12px;
+  padding: 8px 16px;
   border-radius: 12px;
   color: #3b3b3b;
   cursor: pointer;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
   transition: all 0.25s ease;
 }
 
@@ -85,85 +117,77 @@
   border: none;
 }
 
-
-/* --- USER AREA FIXED --- */
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  height: 100%;
+/* Hamburger Button (Mặc định ẩn trên Desktop) */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
 }
 
-/* Box bao avatar + name + logout */
-.user-box {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  height: 100%;
-}
 
-/* Avatar pastel */
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  padding: 2px;
-  background: linear-gradient(135deg, #C6A7FF, #FFD8C3);
-}
+/* --- RESPONSIVE MOBILE (Dưới 900px) --- */
+@media (max-width: 900px) {
+  .topbar {
+      padding: 0 15px; /* Giảm lề */
+  }
+  
+  /* Ẩn tên user để tiết kiệm chỗ */
+  .user-name {
+      display: none;
+  }
+  
+  /* Hiện nút Hamburger */
+  .hamburger-btn {
+      display: block;
+  }
+  
+  /* Xử lý Menu chính */
+  nav {
+      position: absolute;
+      top: 72px; /* Bằng chiều cao topbar */
+      left: 0;
+      width: 100%;
+      background: white;
+      flex-direction: column; /* Xếp dọc */
+      padding: 20px;
+      margin-left: 0;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      
+      /* Hiệu ứng trượt */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+  }
+  
+  /* Class này được JS thêm vào khi bấm nút */
+  nav.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+  }
 
-/* Tên người dùng căn giữa */
-.user-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #5b4daa;
-  display: flex;
-  align-items: center;
-}
+  .nav-item {
+      width: 100%; /* Full chiều ngang */
+      text-align: center;
+      padding: 12px;
+      background: #f8f8fc;
+  }
+  .nav-item.active {
+      background: #eeeaff;
+  }
 
-/* Logout button */
-.logout-btn {
-  border: 1px solid rgba(60, 60, 60, 0.08);
-  background: white;
-  padding: 8px 14px;
-  border-radius: 12px;
-  color: #3b3b3b;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  height: 40px;
-  text-decoration: none;
-  transition: all .25s ease;
-}
-
-.logout-btn:hover {
-  background: #f3e8ff;
-  color: #6b21a8;
-  border-color: #dab6ff;
-}
-
-.logout-btn svg {
-  width: 14px;
-  height: 14px;
-}
-.nav-left {
-  flex: 1;
-   min-width: 0; 
-}
-
-.nav-right {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.topbar {
-  flex-wrap: nowrap;
-}
-
-/* Responsive */
-@media (max-width:900px) {
-  .topbar { padding: 0 14px; }
-  nav { display: none; }
+  /* Ẩn chữ Login/Sign up, chỉ hiện icon hoặc thu gọn button nếu cần */
+  .btn-ghost {
+      padding: 8px 10px;
+      font-size: 13px;
+  }
+  
+  /* Nếu màn hình quá nhỏ, ẩn luôn nút Logout desktop (có thể thêm vào menu sau) */
+  .logout-btn-desktop {
+      display: none; 
+  }
 }

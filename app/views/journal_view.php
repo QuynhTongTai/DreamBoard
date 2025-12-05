@@ -102,7 +102,7 @@
     <div class="dream-canvas-section">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <h4 class="section-title" style="margin:0;">Your Dream Canvas</h4>
-        <a href="vision.php" style="font-size:13px; color:#6b5bff; text-decoration:none; font-weight:600;">Edit Canvas
+        <a href="vision.php" style="font-size:13px; color:#acb0b0; text-decoration:none; font-weight:600;">Edit Canvas
           &rarr;</a>
       </div>
 
