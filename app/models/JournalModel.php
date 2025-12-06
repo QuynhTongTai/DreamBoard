@@ -324,5 +324,23 @@ class JournalModel
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $letter_id]);
     }
+    // ... (Các hàm cũ giữ nguyên) ...
+
+    // [MỚI] Lưu kết quả AI vào bài nhật ký
+    public function saveAiReflection($log_id, $analysis, $advice, $quote) {
+        $query = "UPDATE journey_log 
+                  SET ai_analysis = :analysis, 
+                      ai_advice = :advice, 
+                      ai_quote = :quote 
+                  WHERE log_id = :log_id";
+        
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([
+            ':analysis' => $analysis,
+            ':advice'   => $advice,
+            ':quote'    => $quote,
+            ':log_id'   => $log_id
+        ]);
+    }
 }
 ?>

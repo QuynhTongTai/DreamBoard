@@ -379,7 +379,7 @@ function openEntryDetail(log) {
     document.getElementById('detailEntryText').innerText = log.content;
     document.getElementById('detailEntryProgress').innerText = '+' + log.progress_update + '%';
 
-    // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH (LOGIC MỚI)
+    // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH
     const mediaColumn = document.querySelector('.entry-split-media'); 
     const imgTag = document.getElementById('detailEntryImg');
 
@@ -388,11 +388,9 @@ function openEntryDetail(log) {
         imgTag.src = log.image;
         imgTag.style.display = 'block';
         
-        // --- THÊM DÒNG NÀY: Bấm vào ảnh để phóng to ---
         imgTag.onclick = function() {
             openFullImage(this.src);
         };
-        // ----------------------------------------------
         
         const noImgDiv = document.getElementById('detailNoImage');
         if(noImgDiv) noImgDiv.style.display = 'none';
@@ -409,6 +407,31 @@ function openEntryDetail(log) {
     document.getElementById('editContentInput').value = log.content;
     document.getElementById('editMoodInput').value = log.mood;
     document.getElementById('editProgressInput').value = log.progress_update;
+
+    // --- [MỚI] 4. KIỂM TRA & HIỂN THỊ AI REFLECTION ---
+    const aiCard = document.getElementById('aiInsightCard');
+    const aiBtn = document.querySelector('.btn-soul-reflect');
+
+    // Nếu bài viết này ĐÃ CÓ dữ liệu AI trong Database (Kiểm tra 2 trường quan trọng)
+    if (log.ai_analysis && log.ai_advice) {
+        // Điền dữ liệu vào thẻ
+        document.getElementById('aiAnalysis').innerText = log.ai_analysis;
+        document.getElementById('aiAdvice').innerText = log.ai_advice;
+        document.getElementById('aiQuote').innerText = '"' + log.ai_quote + '"';
+        
+        // Hiện thẻ, Ẩn nút bấm
+        if(aiCard) aiCard.classList.remove('hidden');
+        if(aiBtn) aiBtn.style.display = 'none'; 
+    } 
+    else {
+        // Nếu chưa có: Ẩn thẻ, Hiện nút
+        if(aiCard) aiCard.classList.add('hidden');
+        if(aiBtn) {
+            aiBtn.style.display = 'flex'; 
+            aiBtn.innerHTML = '<i class="ph-fill ph-sparkle"></i> Soul Reflection';
+            aiBtn.disabled = false;
+        }
+    }
 }
 
 function closeEntryDetail() {
@@ -739,8 +762,9 @@ function closeFullImage() {
     }
 }
 /* --- SOUL REFLECTION LOGIC --- */
+/* --- SOUL REFLECTION LOGIC --- */
 function callSoulReflection() {
-    // 1. Lấy nội dung nhật ký hiện tại (biến currentLogData đã có sẵn trong file JS của bạn)
+    // 1. Lấy nội dung nhật ký
     if (!currentLogData || !currentLogData.content) {
         alert("Không tìm thấy nội dung nhật ký!");
         return;
@@ -753,36 +777,59 @@ function callSoulReflection() {
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Connecting to Universe...';
     btn.disabled = true;
-    card.classList.add('hidden'); // Ẩn kết quả cũ
+    card.classList.add('hidden'); 
 
-    // 3. Gọi API PHP
+    // 3. Gọi API lấy lời khuyên từ Google
     fetch('api/ai_reflect.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: currentLogData.content })
     })
     .then(res => res.json())
-    .then(res => {
-        if (res.status === 'success') {
-            // 4. Điền dữ liệu vào thẻ
-            document.getElementById('aiAnalysis').innerText = res.data.analysis;
-            document.getElementById('aiAdvice').innerText = res.data.advice;
-            document.getElementById('aiQuote').innerText = '"' + res.data.quote + '"';
+    .then(aiRes => {
+        if (aiRes.status === 'success') {
+            const data = aiRes.data;
+
+            // 4. Hiện lên giao diện
+            document.getElementById('aiAnalysis').innerText = data.analysis;
+            document.getElementById('aiAdvice').innerText = data.advice;
+            document.getElementById('aiQuote').innerText = '"' + data.quote + '"';
             
-            // Hiện thẻ
             card.classList.remove('hidden');
-            
-            // Scroll xuống cho đẹp
+            btn.style.display = 'none'; // Ẩn nút đi
+
             card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // 5. [QUAN TRỌNG] GỌI API LƯU VÀO DATABASE NGAY LẬP TỨC
+            fetch('api/save_ai_reflection.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    log_id: currentLogData.log_id,
+                    analysis: data.analysis,
+                    advice: data.advice,
+                    quote: data.quote
+                })
+            }).then(res => res.json()).then(saveRes => {
+                if(saveRes.status === 'success') {
+                    console.log("Đã lưu lời khuyên vào vũ trụ database!");
+                    
+                    // Cập nhật lại biến currentLogData ở Client để nếu tắt popup mở lại vẫn còn
+                    currentLogData.ai_analysis = data.analysis;
+                    currentLogData.ai_advice = data.advice;
+                    currentLogData.ai_quote = data.quote;
+                }
+            });
+
         } else {
-            alert("Vũ trụ đang bận: " + res.message);
+            alert("Vũ trụ đang bận: " + aiRes.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     })
     .catch(err => {
         console.error(err);
         alert("Lỗi kết nối.");
-    })
-    .finally(() => {
         btn.innerHTML = originalText;
         btn.disabled = false;
     });
