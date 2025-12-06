@@ -529,12 +529,31 @@
             </div>
 
             <div class="action-group">
+              <button class="btn-soul-reflect" onclick="callSoulReflection()">
+                <i class="ph-fill ph-sparkle"></i> Soul Reflection
+              </button>
               <button class="btn-circle edit" onclick="toggleEditMode(true)" title="Edit">
                 <i class="ph ph-pencil-simple"></i>
               </button>
               <button class="btn-circle delete" onclick="deleteEntryCurrent()" title="Delete">
                 <i class="ph ph-trash"></i>
               </button>
+            </div>
+
+          </div>
+          <div id="aiInsightCard" class="ai-insight-card hidden">
+            <div class="ai-header">
+              <i class="ph-fill ph-magic-wand"></i> <span>Message from the Universe</span>
+            </div>
+            <div class="ai-body">
+              <p class="ai-mood-analysis" id="aiAnalysis">Loading...</p>
+              <div class="ai-advice-box">
+                <p id="aiAdvice">...</p>
+              </div>
+              <div class="ai-quote">
+                <i class="ph-fill ph-quotes"></i>
+                <span id="aiQuote">...</span>
+              </div>
             </div>
           </div>
         </div>

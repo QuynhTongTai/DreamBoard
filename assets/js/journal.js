@@ -738,3 +738,52 @@ function closeFullImage() {
         lightbox.classList.add('hidden');
     }
 }
+/* --- SOUL REFLECTION LOGIC --- */
+function callSoulReflection() {
+    // 1. Lấy nội dung nhật ký hiện tại (biến currentLogData đã có sẵn trong file JS của bạn)
+    if (!currentLogData || !currentLogData.content) {
+        alert("Không tìm thấy nội dung nhật ký!");
+        return;
+    }
+
+    const btn = document.querySelector('.btn-soul-reflect');
+    const card = document.getElementById('aiInsightCard');
+    
+    // 2. Hiệu ứng Loading
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Connecting to Universe...';
+    btn.disabled = true;
+    card.classList.add('hidden'); // Ẩn kết quả cũ
+
+    // 3. Gọi API PHP
+    fetch('api/ai_reflect.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: currentLogData.content })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === 'success') {
+            // 4. Điền dữ liệu vào thẻ
+            document.getElementById('aiAnalysis').innerText = res.data.analysis;
+            document.getElementById('aiAdvice').innerText = res.data.advice;
+            document.getElementById('aiQuote').innerText = '"' + res.data.quote + '"';
+            
+            // Hiện thẻ
+            card.classList.remove('hidden');
+            
+            // Scroll xuống cho đẹp
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            alert("Vũ trụ đang bận: " + res.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi kết nối.");
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
