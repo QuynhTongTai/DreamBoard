@@ -125,5 +125,52 @@ class UserModel
         
         return $stmt->execute();
     }
+    // --- [MỚI] CÁC HÀM XỬ LÝ OTP (QUÊN MẬT KHẨU) ---
+
+    // 1. Lưu mã OTP và thời gian hết hạn
+    public function saveOtp($email, $otp, $expiry) {
+        // Kiểm tra email có tồn tại không trước
+        if (!$this->isEmailExists($email)) {
+            return false; 
+        }
+
+        $query = "UPDATE " . $this->table_name . " SET otp_code = :otp, otp_expiry = :expiry WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind dữ liệu
+        $stmt->bindParam(':otp', $otp);
+        $stmt->bindParam(':expiry', $expiry);
+        $stmt->bindParam(':email', $email);
+        
+        return $stmt->execute();
+    }
+
+    // 2. Lấy thông tin User dựa trên Email và OTP để kiểm tra
+    public function getUserByEmailAndOtp($email, $otp) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email AND otp_code = :otp LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':otp', $otp);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // 3. Cập nhật mật khẩu mới và xóa OTP
+    public function updatePassword($email, $newPassword) {
+        // Mã hóa mật khẩu mới
+        $hashed = password_hash($newPassword, PASSWORD_BCRYPT);
+        
+        // Cập nhật pass, xóa OTP để không dùng lại được
+        $query = "UPDATE " . $this->table_name . " 
+                  SET password = :pass, otp_code = NULL, otp_expiry = NULL 
+                  WHERE email = :email";
+                  
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':pass', $hashed);
+        $stmt->bindParam(':email', $email);
+        
+        return $stmt->execute();
+    }
 }
 ?>
