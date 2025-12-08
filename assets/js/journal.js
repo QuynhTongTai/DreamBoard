@@ -99,10 +99,21 @@ function saveGoal(event) {
         btn.disabled = true;
     }
 
-    // Sử dụng FormData để gửi dữ liệu chuẩn xác nhất
+    // --- SỬA LẠI ĐOẠN NÀY ---
+    // 1. Lấy thêm các thẻ input từ HTML (dựa vào name hoặc querySelector)
+    const habitInput = document.querySelector('input[name="daily_habit"]');
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
+
+    // 2. Sử dụng FormData để gửi dữ liệu
     const formData = new FormData();
     formData.append('title', title);
     formData.append('topic_name', topicName);
+
+    // 3. Append thêm Habit và Date (nếu có)
+    formData.append('daily_habit', habitInput ? habitInput.value.trim() : '');
+    formData.append('start_date', startDateInput ? startDateInput.value : '');
+    formData.append('end_date', endDateInput ? endDateInput.value : '');
 
     // Lưu ý: Đường dẫn API giữ nguyên như lúc fix lỗi
     fetch("/DreamBoard/api/add_goal.php", {
@@ -370,7 +381,7 @@ function openEntryDetail(log) {
     // 1. Data Text
     const dateStr = new Date(log.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('detailEntryDate').innerText = dateStr;
-    
+
     // Title logic
     const displayTitle = log.journey_title ? log.journey_title : 'Journey Entry';
     document.getElementById('detailEntryTitle').innerText = displayTitle;
@@ -380,22 +391,22 @@ function openEntryDetail(log) {
     document.getElementById('detailEntryProgress').innerText = '+' + log.progress_update + '%';
 
     // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH
-    const mediaColumn = document.querySelector('.entry-split-media'); 
+    const mediaColumn = document.querySelector('.entry-split-media');
     const imgTag = document.getElementById('detailEntryImg');
 
     if (log.image) {
-        mediaColumn.style.display = 'flex'; 
+        mediaColumn.style.display = 'flex';
         imgTag.src = log.image;
         imgTag.style.display = 'block';
-        
-        imgTag.onclick = function() {
+
+        imgTag.onclick = function () {
             openFullImage(this.src);
         };
-        
+
         const noImgDiv = document.getElementById('detailNoImage');
-        if(noImgDiv) noImgDiv.style.display = 'none';
+        if (noImgDiv) noImgDiv.style.display = 'none';
     } else {
-        mediaColumn.style.display = 'none'; 
+        mediaColumn.style.display = 'none';
     }
 
     // 3. Fill Form Edit
@@ -418,16 +429,16 @@ function openEntryDetail(log) {
         document.getElementById('aiAnalysis').innerText = log.ai_analysis;
         document.getElementById('aiAdvice').innerText = log.ai_advice;
         document.getElementById('aiQuote').innerText = '"' + log.ai_quote + '"';
-        
+
         // Hiện thẻ, Ẩn nút bấm
-        if(aiCard) aiCard.classList.remove('hidden');
-        if(aiBtn) aiBtn.style.display = 'none'; 
-    } 
+        if (aiCard) aiCard.classList.remove('hidden');
+        if (aiBtn) aiBtn.style.display = 'none';
+    }
     else {
         // Nếu chưa có: Ẩn thẻ, Hiện nút
-        if(aiCard) aiCard.classList.add('hidden');
-        if(aiBtn) {
-            aiBtn.style.display = 'flex'; 
+        if (aiCard) aiCard.classList.add('hidden');
+        if (aiBtn) {
+            aiBtn.style.display = 'flex';
             aiBtn.innerHTML = '<i class="ph-fill ph-sparkle"></i> Soul Reflection';
             aiBtn.disabled = false;
         }
@@ -772,12 +783,12 @@ function callSoulReflection() {
 
     const btn = document.querySelector('.btn-soul-reflect');
     const card = document.getElementById('aiInsightCard');
-    
+
     // 2. Hiệu ứng Loading
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Connecting to Universe...';
     btn.disabled = true;
-    card.classList.add('hidden'); 
+    card.classList.add('hidden');
 
     // 3. Gọi API lấy lời khuyên từ Google
     fetch('api/ai_reflect.php', {
@@ -785,54 +796,54 @@ function callSoulReflection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: currentLogData.content })
     })
-    .then(res => res.json())
-    .then(aiRes => {
-        if (aiRes.status === 'success') {
-            const data = aiRes.data;
+        .then(res => res.json())
+        .then(aiRes => {
+            if (aiRes.status === 'success') {
+                const data = aiRes.data;
 
-            // 4. Hiện lên giao diện
-            document.getElementById('aiAnalysis').innerText = data.analysis;
-            document.getElementById('aiAdvice').innerText = data.advice;
-            document.getElementById('aiQuote').innerText = '"' + data.quote + '"';
-            
-            card.classList.remove('hidden');
-            btn.style.display = 'none'; // Ẩn nút đi
+                // 4. Hiện lên giao diện
+                document.getElementById('aiAnalysis').innerText = data.analysis;
+                document.getElementById('aiAdvice').innerText = data.advice;
+                document.getElementById('aiQuote').innerText = '"' + data.quote + '"';
 
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                card.classList.remove('hidden');
+                btn.style.display = 'none'; // Ẩn nút đi
 
-            // 5. [QUAN TRỌNG] GỌI API LƯU VÀO DATABASE NGAY LẬP TỨC
-            fetch('api/save_ai_reflection.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    log_id: currentLogData.log_id,
-                    analysis: data.analysis,
-                    advice: data.advice,
-                    quote: data.quote
-                })
-            }).then(res => res.json()).then(saveRes => {
-                if(saveRes.status === 'success') {
-                    console.log("Đã lưu lời khuyên vào vũ trụ database!");
-                    
-                    // Cập nhật lại biến currentLogData ở Client để nếu tắt popup mở lại vẫn còn
-                    currentLogData.ai_analysis = data.analysis;
-                    currentLogData.ai_advice = data.advice;
-                    currentLogData.ai_quote = data.quote;
-                }
-            });
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        } else {
-            alert("Vũ trụ đang bận: " + aiRes.message);
+                // 5. [QUAN TRỌNG] GỌI API LƯU VÀO DATABASE NGAY LẬP TỨC
+                fetch('api/save_ai_reflection.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        log_id: currentLogData.log_id,
+                        analysis: data.analysis,
+                        advice: data.advice,
+                        quote: data.quote
+                    })
+                }).then(res => res.json()).then(saveRes => {
+                    if (saveRes.status === 'success') {
+                        console.log("Đã lưu lời khuyên vào vũ trụ database!");
+
+                        // Cập nhật lại biến currentLogData ở Client để nếu tắt popup mở lại vẫn còn
+                        currentLogData.ai_analysis = data.analysis;
+                        currentLogData.ai_advice = data.advice;
+                        currentLogData.ai_quote = data.quote;
+                    }
+                });
+
+            } else {
+                alert("Vũ trụ đang bận: " + aiRes.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Lỗi kết nối.");
             btn.innerHTML = originalText;
             btn.disabled = false;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Lỗi kết nối.");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
+        });
 }/* =========================================
    VOICE TO TEXT (NHẬP LIỆU GIỌNG NÓI)
    ================================********* */
@@ -861,40 +872,40 @@ function startDictation() {
     recognition.start();
 
     // 3. Hiệu ứng khi bắt đầu nói
-    recognition.onstart = function() {
+    recognition.onstart = function () {
         btn.style.color = "#ff4757"; // Chuyển màu đỏ
         btn.style.transform = "scale(1.2)"; // Phóng to nhẹ
         textarea.placeholder = "Listening to you…";
     };
 
     // 4. Khi nhận được kết quả
-    recognition.onresult = function(event) {
+    recognition.onresult = function (event) {
         const text = event.results[0][0].transcript;
-        
+
         // Nối thêm vào nội dung cũ (nếu có)
         const currentText = textarea.value;
         textarea.value = currentText ? currentText + " " + text : text;
     };
 
     // 5. Xử lý lỗi
-    recognition.onerror = function(event) {
+    recognition.onerror = function (event) {
         console.error("Voice error", event.error);
         alert("I didn’t catch that, please try again.");
         resetVoiceButton(btn, textarea);
     };
 
     // 6. Kết thúc
-    recognition.onend = function() {
+    recognition.onend = function () {
         resetVoiceButton(btn, textarea);
     };
 }
 
 function resetVoiceButton(btn, textarea) {
-    if(btn) {
+    if (btn) {
         btn.style.color = "#aaa"; // Trả lại màu xám
         btn.style.transform = "scale(1)";
     }
-    if(textarea) {
+    if (textarea) {
         textarea.placeholder = "Write down your thoughts...";
     }
 }

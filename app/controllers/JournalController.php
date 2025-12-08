@@ -82,10 +82,15 @@ class JournalController
         }
 
         $user_id = $_SESSION['user_id'];
-        $title = $_POST['title'] ?? '';
         
-        // 2. Nhận TÊN topic từ input text (không phải ID)
+        // Lấy dữ liệu cơ bản
+        $title = $_POST['title'] ?? '';
         $topic_name = $_POST['topic_name'] ?? ''; 
+
+        // [MỚI] Lấy thêm dữ liệu Thói quen và Ngày tháng từ form
+        $daily_habit = $_POST['daily_habit'] ?? '';
+        $start_date = $_POST['start_date'] ?? null;
+        $end_date = $_POST['end_date'] ?? null;
 
         if (trim($title) === '') {
             echo json_encode(['status' => 'error', 'message' => 'Title required']);
@@ -94,14 +99,18 @@ class JournalController
 
         $model = new JournalModel();
 
-        // 3. LOGIC QUAN TRỌNG:
-        // Từ cái tên topic người dùng nhập -> Tìm ID cũ hoặc Tạo mới lấy ID
+        // 3. Xử lý Topic
         $topic_id = $model->getOrCreateTopic($user_id, $topic_name);
 
-        // 4. Gọi hàm Model để lưu Goal với cái ID vừa tìm được
-        $model->addGoal($user_id, $title, $topic_id);
+        // 4. [CẬP NHẬT] Gọi hàm addGoal với đầy đủ tham số mới
+        // Thứ tự tham số phải khớp với bên Model: ($user_id, $title, $topic_id, $habit_title, $start_date, $end_date)
+        $result = $model->addGoal($user_id, $title, $topic_id, $daily_habit, $start_date, $end_date);
 
-        echo json_encode(['status' => 'success']);
+        if ($result) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Database Error']);
+        }
     }
     public function getGoalLogs()
     {

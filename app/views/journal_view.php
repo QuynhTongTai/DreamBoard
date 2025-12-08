@@ -301,7 +301,24 @@
         </datalist>
 
       </div>
+      <div class="form-group" style="margin-top: 15px;">
+        <label style="display:block; margin-bottom:8px; font-weight:500;">Daily Ritual (Daily Habit)</label>
+        <input type="text" name="daily_habit" placeholder="e.g. Read 5 pages, Drink water..."
+          style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <small style="color:#888; font-size:12px;">A small action you commit to do every day for this goal.</small>
+      </div>
 
+      <div class="form-group" style="margin-top: 15px; display: flex; gap: 10px;">
+        <div style="flex:1">
+          <label style="display:block; margin-bottom:5px; font-weight:500; font-size:13px;">Start Date</label>
+          <input type="date" name="start_date" value="<?php echo date('Y-m-d'); ?>"
+            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px;">
+        </div>
+        <div style="flex:1">
+          <label style="display:block; margin-bottom:5px; font-weight:500; font-size:13px;">End Date</label>
+          <input type="date" name="end_date" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px;">
+        </div>
+      </div>
       <div class="modal-actions" style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
         <button class="btn-cancel" onclick="closeModal()"
           style="padding:8px 16px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer;">Cancel</button>

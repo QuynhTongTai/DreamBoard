@@ -1,4 +1,6 @@
 <?php
+// File: api/add_goal.php
+
 // Tắt hiển thị lỗi trực tiếp ra màn hình (để tránh làm hỏng JSON)
 error_reporting(0); 
 
@@ -18,9 +20,15 @@ try {
 
     $user_id = $_SESSION['user_id'];
     
-    // 2. Lấy dữ liệu
+    // 2. Lấy dữ liệu cơ bản
     $title = $_POST['title'] ?? '';
     $topic_name = $_POST['topic_name'] ?? '';
+
+    // [MỚI] Lấy thêm dữ liệu Thói quen và Ngày tháng từ Form
+    $daily_habit = $_POST['daily_habit'] ?? '';
+    // Nếu ngày rỗng thì để null, tránh lỗi định dạng Date trong SQL
+    $start_date = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
+    $end_date = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
 
     // 3. Validate
     if (trim($title) === '') {
@@ -33,8 +41,9 @@ try {
     // Tìm hoặc tạo Topic
     $topic_id = $model->getOrCreateTopic($user_id, $topic_name);
 
-    // Thêm Goal
-    $result = $model->addGoal($user_id, $title, $topic_id);
+    // [CẬP NHẬT] Gọi hàm addGoal với đầy đủ 6 tham số (để khớp với bên Model vừa sửa)
+    // Thứ tự: ($user_id, $title, $topic_id, $habit_title, $start_date, $end_date)
+    $result = $model->addGoal($user_id, $title, $topic_id, $daily_habit, $start_date, $end_date);
 
     if ($result) {
         // Trả về success đơn giản

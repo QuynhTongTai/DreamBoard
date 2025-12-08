@@ -143,25 +143,49 @@ class JournalModel
     // File: app/models/JournalModel.php
 
     // Hàm này chỉ làm nhiệm vụ lưu vào Database
-    public function addGoal($user_id, $title, $topic_id)
+    // File: app/models/JournalModel.php
+
+    // Sửa lại hàm addGoal để nhận thêm habit, start_date, end_date
+    public function addGoal($user_id, $title, $topic_id, $habit_title = null, $start_date = null, $end_date = null)
     {
-        $query = "INSERT INTO goals (user_id, title, topic_id, progress, created_at) 
-              VALUES (:uid, :title, :topic_id, 0, NOW())";
+        // 1. INSERT VÀO BẢNG GOALS (Lưu thông tin chung + ngày tháng)
+        $query = "INSERT INTO goals (user_id, title, topic_id, progress, start_date, end_date, created_at) 
+                  VALUES (:uid, :title, :topic_id, 0, :start, :end, NOW())";
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
 
+        // Xử lý Topic ID (Giữ nguyên logic cũ)
         if (empty($topic_id) || $topic_id === 'all') {
             $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindParam(':topic_id', $topic_id);
         }
 
+        // Xử lý Date: Nếu rỗng thì lưu NULL vào Database
+        $stmt->bindValue(':start', !empty($start_date) ? $start_date : null);
+        $stmt->bindValue(':end', !empty($end_date) ? $end_date : null);
+
         if ($stmt->execute()) {
-            // [QUAN TRỌNG] Trả về ID của goal vừa tạo
-            return $this->conn->lastInsertId();
+            // Lấy ID của Goal vừa tạo ra
+            $goal_id = $this->conn->lastInsertId();
+
+            // 2. INSERT VÀO BẢNG HABITS (Nếu người dùng có nhập thói quen)
+            if (!empty($habit_title)) {
+                $queryHabit = "INSERT INTO habits (goal_id, user_id, title, created_at) 
+                               VALUES (:gid, :uid, :title, NOW())";
+                
+                $stmtHabit = $this->conn->prepare($queryHabit);
+                $stmtHabit->execute([
+                    ':gid' => $goal_id,
+                    ':uid' => $user_id,
+                    ':title' => $habit_title
+                ]);
+            }
+
+            return $goal_id;
         }
         return false;
     }
