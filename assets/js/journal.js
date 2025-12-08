@@ -318,7 +318,7 @@ function deleteCurrentGoal() {
         return;
     }
 
-    if (confirm("⚠️ Bạn có chắc chắn muốn xóa mục tiêu này?\nTất cả nhật ký (Journey) thuộc về nó cũng sẽ bị xóa vĩnh viễn!")) {
+    if (confirm("Are you sure you want to delete this goal?\nAll journeys associated with it will also be permanently deleted!")) {
 
         const btnDelete = document.querySelector('.btn-delete-styled');
         const originalText = btnDelete ? btnDelete.innerHTML : 'Delete';
@@ -335,7 +335,7 @@ function deleteCurrentGoal() {
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert("Đã xóa mục tiêu thành công!");
+                    alert("The goal has been successfully deleted!");
                     closeGoalDetails();
                     location.reload();
                 } else {
@@ -833,4 +833,68 @@ function callSoulReflection() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     });
+}/* =========================================
+   VOICE TO TEXT (NHẬP LIỆU GIỌNG NÓI)
+   ================================********* */
+
+function startDictation() {
+    // 1. Kiểm tra trình duyệt
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("Trình duyệt không hỗ trợ chức năng này (Hãy dùng Google Chrome).");
+        return;
+    }
+
+    const btn = document.getElementById('btnVoiceInput');
+    const textarea = document.getElementById('journeyContent');
+
+    // 2. Kiểm tra xem HTML đã đúng chưa
+    if (!btn || !textarea) {
+        console.error("Lỗi: Không tìm thấy ID 'btnVoiceInput' hoặc 'journeyContent'");
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false; // Tắt tự động ngắt
+    recognition.interimResults = false;
+    recognition.lang = "vi-VN"; // Tiếng Việt
+
+    recognition.start();
+
+    // 3. Hiệu ứng khi bắt đầu nói
+    recognition.onstart = function() {
+        btn.style.color = "#ff4757"; // Chuyển màu đỏ
+        btn.style.transform = "scale(1.2)"; // Phóng to nhẹ
+        textarea.placeholder = "Listening to you…";
+    };
+
+    // 4. Khi nhận được kết quả
+    recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        
+        // Nối thêm vào nội dung cũ (nếu có)
+        const currentText = textarea.value;
+        textarea.value = currentText ? currentText + " " + text : text;
+    };
+
+    // 5. Xử lý lỗi
+    recognition.onerror = function(event) {
+        console.error("Voice error", event.error);
+        alert("I didn’t catch that, please try again.");
+        resetVoiceButton(btn, textarea);
+    };
+
+    // 6. Kết thúc
+    recognition.onend = function() {
+        resetVoiceButton(btn, textarea);
+    };
+}
+
+function resetVoiceButton(btn, textarea) {
+    if(btn) {
+        btn.style.color = "#aaa"; // Trả lại màu xám
+        btn.style.transform = "scale(1)";
+    }
+    if(textarea) {
+        textarea.placeholder = "Write down your thoughts...";
+    }
 }

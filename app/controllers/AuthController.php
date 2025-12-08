@@ -117,7 +117,7 @@ class AuthController
         if ($this->userModel->saveOtp($email, $otp, $expiry)) {
             // Gửi mail thật
             if ($this->sendMailSMTP($email, $otp)) {
-                echo json_encode(['status' => 'success', 'message' => 'Mã OTP đã được gửi đến email của bạn!']);
+                echo json_encode(['status' => 'success', 'message' => 'The OTP has been sent to your email!']);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Lỗi gửi mail. Vui lòng thử lại sau.']);
             }

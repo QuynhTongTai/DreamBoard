@@ -448,10 +448,16 @@
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
               <label class="form-label-styled">What happened?</label>
-              <textarea name="content" rows="4" class="form-input-styled"
-                placeholder="Write down your thoughts..."></textarea>
+
+              <textarea name="content" id="journeyContent" rows="4" class="form-input-styled"
+                placeholder="Write down your thoughts..." style="padding-right: 40px;"></textarea> <button type="button"
+                id="btnVoiceInput" onclick="startDictation()"
+                style="position: absolute; bottom: 12px; right: 12px; border: none; background: none; cursor: pointer; color: #aaa; transition: 0.3s; padding: 0;"
+                title="Speak instead of typing">
+                <i class="ph-fill ph-microphone" style="font-size: 24px;"></i>
+              </button>
             </div>
 
             <div class="form-group">

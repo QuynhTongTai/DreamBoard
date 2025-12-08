@@ -1179,3 +1179,15 @@ body {
 
 @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* Hiệu ứng micro đang thu âm */
+@keyframes pulseRed {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation i {
+    animation: pulseRed 1s infinite;
+    color: #ff4757 !important;
+    text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+}
