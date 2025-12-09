@@ -1249,3 +1249,103 @@ body {
 .todo-item.completed .todo-sub {
     color: #ccc;
 }
+/* --- STYLE CHO KHUNG HABIT TRONG MODAL --- */
+
+.goal-habits-container {
+    background: linear-gradient(to right, #fdfbfd, #f8f6ff);
+    border: 1px dashed #dcd6ff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px; /* Tạo khoảng cách với Timeline bên dưới */
+    animation: fadeIn 0.3s ease;
+}
+
+.habit-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    color: #6b5bff; /* Màu tím chủ đạo */
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.habit-section-header i {
+    font-size: 18px;
+}
+
+/* Grid hiển thị các habit (dạng thẻ nhỏ) */
+.habit-grid-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Từng thẻ Habit (Pill) */
+.habit-pill {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 8px 14px;
+    border-radius: 20px; /* Bo tròn hình viên thuốc */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* Hiệu ứng Hover */
+.habit-pill:hover {
+    border-color: #C6A7FF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(198, 167, 255, 0.2);
+}
+
+/* Checkbox (Custom màu tím) */
+.habit-pill input[type="checkbox"] {
+    accent-color: #6b5bff;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* Trạng thái ĐÃ LÀM (Done) */
+.habit-pill.done {
+    background: #f3e8ff; /* Nền tím nhạt */
+    color: #888;          /* Chữ mờ đi */
+    text-decoration: line-through; /* Gạch ngang chữ */
+    border-color: transparent;
+}
+/* assets/css/journal.css */
+
+.meta-days-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.5); /* Nền mờ */
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #444;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Màu sắc cho các trạng thái (JS sẽ add class này) */
+.meta-days-left.urgent {
+    background: #ffebeb;
+    color: #d63031; /* Màu đỏ báo động */
+    border-color: #ffcccc;
+}
+
+.meta-days-left.chill {
+    background: #e3fcef;
+    color: #00b894; /* Màu xanh thư thái */
+    border-color: #b8e9d6;
+}

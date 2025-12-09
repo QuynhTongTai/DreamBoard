@@ -72,13 +72,14 @@
           <div class="goal-card filter-item" data-type="goal" data-topic-id="<?php echo $g['topic_id']; ?>"
             data-search-text="<?php echo strtolower(htmlspecialchars($g['title'])); ?>"
             id="goal-card-<?php echo $g['goal_id']; ?>" onclick="openGoalDetails(
-    <?php echo $g['goal_id']; ?>, 
-    '<?php echo htmlspecialchars($g['title']); ?>', 
-    <?php echo $percent; ?>,
-    '<?php echo htmlspecialchars($g['topic_color'] ?? '#C6A7FF'); ?>', 
-    '<?php echo date('M d, Y', strtotime($g['created_at'])); ?>'
-)" style="background-color: <?php echo $bgColor; ?>; <?php if ($index >= 9)
-       echo 'display:none;'; ?>">
+        <?php echo $g['goal_id']; ?>, 
+        '<?php echo htmlspecialchars($g['title']); ?>', 
+        <?php echo $percent; ?>,
+        '<?php echo htmlspecialchars($g['topic_color'] ?? '#C6A7FF'); ?>', 
+        '<?php echo date('M d, Y', strtotime($g['created_at'])); ?>',
+        '<?php echo $g['end_date']; ?>' /* [MỚI] Thêm dòng này (nhớ dấu phẩy ở dòng trên) */
+    )" style="background-color: <?php echo $bgColor; ?>; <?php if ($index >= 9)
+         echo 'display:none;'; ?>">
 
             <i class="<?php echo $randomIconClass; ?> goal-icon-standalone"></i>
 
@@ -219,41 +220,44 @@
         </div>
       </div>
     </div>
-    <div class="side-box" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px;">
-            <div>
-                <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display'; font-size: 16px;">Today's Routine </h4>
-                <span style="font-size: 11px; color: #888;">Daily Check-in</span>
-            </div>
-            <span style="font-size: 12px; font-weight: 600; color: #6b5bff; background: #f3e8ff; padding: 4px 8px; border-radius: 6px;">
-                <?php echo date('M d'); ?>
-            </span>
-        </div>
+    <div class="side-box"
+      style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
 
-        <?php if (!empty($dailyHabits)): ?>
-            <div class="habit-list">
-                <?php foreach ($dailyHabits as $h): ?>
-                    <div class="todo-item <?php echo $h['is_done'] ? 'completed' : ''; ?>" id="todo-item-<?php echo $h['habit_id']; ?>">
-                        <label class="todo-label">
-                            <input type="checkbox" class="todo-checkbox" 
-                                   <?php echo $h['is_done'] ? 'checked' : ''; ?>
-                                   onchange="toggleHabit(<?php echo $h['habit_id']; ?>, this)">
-                            
-                            <div class="todo-content">
-                                <span class="todo-text"><?php echo htmlspecialchars($h['title']); ?></span>
-                                <small class="todo-sub"><?php echo htmlspecialchars($h['goal_title']); ?></small>
-                            </div>
-                        </label>
-                    </div>
-                <?php endforeach; ?>
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px;">
+        <div>
+          <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display'; font-size: 16px;">Today's Routine </h4>
+          <span style="font-size: 11px; color: #888;">Daily Check-in</span>
+        </div>
+        <span
+          style="font-size: 12px; font-weight: 600; color: #6b5bff; background: #f3e8ff; padding: 4px 8px; border-radius: 6px;">
+          <?php echo date('M d'); ?>
+        </span>
+      </div>
+
+      <?php if (!empty($dailyHabits)): ?>
+        <div class="habit-list">
+          <?php foreach ($dailyHabits as $h): ?>
+            <div class="todo-item <?php echo $h['is_done'] ? 'completed' : ''; ?>"
+              id="todo-item-<?php echo $h['habit_id']; ?>">
+              <label class="todo-label">
+                <input type="checkbox" class="todo-checkbox" <?php echo $h['is_done'] ? 'checked' : ''; ?>
+                  onchange="toggleHabit(<?php echo $h['habit_id']; ?>, this)">
+
+                <div class="todo-content">
+                  <span class="todo-text"><?php echo htmlspecialchars($h['title']); ?></span>
+                  <small class="todo-sub"><?php echo htmlspecialchars($h['goal_title']); ?></small>
+                </div>
+              </label>
             </div>
-        <?php else: ?>
-            <div style="text-align:center; padding: 20px 0; color: #999;">
-                <i class="ph ph-coffee" style="font-size: 24px; margin-bottom: 5px; display:block;"></i>
-                <span style="font-size: 12px;">No routines set for today.<br>Relax & Enjoy!</span>
-            </div>
-        <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <div style="text-align:center; padding: 20px 0; color: #999;">
+          <i class="ph ph-coffee" style="font-size: 24px; margin-bottom: 5px; display:block;"></i>
+          <span style="font-size: 12px;">No routines set for today.<br>Relax & Enjoy!</span>
+        </div>
+      <?php endif; ?>
     </div>
     <div class="side-box"
       style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
@@ -391,6 +395,9 @@
               <h2 id="detailGoalTitle">Read 5 Books</h2>
               <div class="hero-meta">
                 <span id="detailGoalDate">Created at: Nov 23, 2023</span>
+                <span id="detailDaysLeft" class="meta-days-left hidden">
+                  <i class="ph-bold ph-clock-countdown"></i> <span id="daysLeftText">12 days left</span>
+                </span>
                 <span id="detailGoalCount">0 entities</span>
               </div>
             </div>
@@ -408,8 +415,26 @@
           </div>
         </div>
 
-        <div class="modal-scroll-body timeline-container-styled" id="goalLogsContainer">
-          <div class="loading-spinner">Loading journey...</div>
+        <div class="modal-scroll-body timeline-container-styled" id="goalLogsContainerWrapper">
+
+          <div id="modalHabitSection" class="goal-habits-container hidden">
+            <div class="habit-section-header">
+              <i class="ph-duotone ph-check-circle"></i>
+              <span>Daily Routine</span>
+            </div>
+
+            <div id="modalHabitList" class="habit-grid-list">
+            </div>
+          </div>
+          <h4
+            style="margin: 20px 0 15px 0; color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">
+            Journal Entries
+          </h4>
+
+          <div id="goalLogsContainer">
+            <div class="loading-spinner">Loading journey...</div>
+          </div>
+
         </div>
 
         <div class="goal-footer-actions">
@@ -525,7 +550,7 @@
               </button>
             </div>
 
-            
+
 
             <div class="form-group">
               <label class="form-label-styled">Attach a photo</label>
@@ -586,7 +611,7 @@
           </div>
 
           <div class="split-footer">
-            
+
 
             <div class="action-group">
               <button class="btn-soul-reflect" onclick="callSoulReflection()">
@@ -634,7 +659,7 @@
               <input type="text" name="mood" id="editMoodInput" class="form-input-styled">
             </div>
 
-            
+
 
             <div class="modal-actions">
               <button type="button" class="btn-cancel-panel" onclick="toggleEditMode(false)">Cancel</button>

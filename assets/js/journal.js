@@ -152,7 +152,8 @@ function saveGoal(event) {
 }
 
 // --- MODAL CHI TIẾT GOAL ---
-function openGoalDetails(goalId, goalTitle, goalProgress, topicColor, createdAt) {
+// [SỬA 1] Thêm tham số endDate vào cuối cùng
+function openGoalDetails(goalId, goalTitle, goalProgress, topicColor, createdAt, endDate) {
     const modal = document.getElementById('goalDetailsModal');
     if (modal) modal.classList.remove('hidden');
     activeTopicColor = topicColor || '#C6A7FF';
@@ -164,7 +165,55 @@ function openGoalDetails(goalId, goalTitle, goalProgress, topicColor, createdAt)
 
     // 1. CẬP NHẬT HEADER HERO
     document.getElementById('detailGoalTitle').innerText = goalTitle;
-    document.getElementById('detailGoalDate').innerText = "Created at: " + (createdAt || 'Unknown date');
+    document.getElementById('detailGoalDate').innerText = "Created: " + (createdAt || 'Unknown');
+
+    // ============================================================
+    // [PHẦN MỚI] XỬ LÝ NGÀY CÒN LẠI (DAYS LEFT)
+    // ============================================================
+    const daysLabel = document.getElementById('detailDaysLeft');
+    const daysText = document.getElementById('daysLeftText');
+
+    if (daysLabel && daysText) {
+        // Reset class về mặc định
+        daysLabel.className = 'meta-days-left';
+        daysLabel.style.opacity = '1';
+
+        // Kiểm tra nếu có ngày kết thúc hợp lệ
+        if (endDate && endDate !== '0000-00-00') {
+            const start = new Date(); // Thời gian hiện tại
+            const end = new Date(endDate);
+
+            // Tính khoảng cách (miliseconds -> days)
+            const diffTime = end - start;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            daysLabel.classList.remove('hidden');
+
+            if (diffDays < 0) {
+                // Đã quá hạn
+                daysText.innerText = `Expired ${Math.abs(diffDays)} days ago`;
+                daysLabel.style.opacity = '0.6'; // Làm mờ
+            } else if (diffDays === 0) {
+                // Hạn là hôm nay
+                daysText.innerText = "Due Today!";
+                daysLabel.classList.add('urgent');
+            } else {
+                // Còn hạn
+                daysText.innerText = `${diffDays} days left`;
+
+                // Nếu còn dưới 7 ngày -> Màu đỏ (Urgent), ngược lại Xanh (Chill)
+                if (diffDays <= 7) {
+                    daysLabel.classList.add('urgent');
+                } else {
+                    daysLabel.classList.add('chill');
+                }
+            }
+        } else {
+            // Không có ngày kết thúc -> Ẩn nhãn
+            daysLabel.classList.add('hidden');
+        }
+    }
+    // ============================================================
 
     // Gán màu nền theo topic
     const headerHero = document.getElementById('goalHeaderHero');
@@ -187,7 +236,44 @@ function openGoalDetails(goalId, goalTitle, goalProgress, topicColor, createdAt)
         circleText.textContent = `${goalProgress}%`;
     }
 
-    // 2. LOAD DATA TIMELINE
+    // ============================================================
+    // 2. LOAD HABITS (HIỂN THỊ DANH SÁCH THÓI QUEN)
+    // ============================================================
+    const habitSection = document.getElementById('modalHabitSection');
+    const habitListContainer = document.getElementById('modalHabitList');
+
+    if (habitSection && habitListContainer) {
+        habitSection.classList.add('hidden');
+        habitListContainer.innerHTML = '';
+
+        fetch(`api/get_goal_habits.php?goal_id=${goalId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.data && data.data.length > 0) {
+                    habitSection.classList.remove('hidden');
+
+                    let html = '';
+                    data.data.forEach(h => {
+                        const isChecked = h.is_done ? 'checked' : '';
+                        const doneClass = h.is_done ? 'done' : '';
+
+                        html += `
+                            <label class="habit-pill ${doneClass}" id="modal-habit-${h.habit_id}">
+                                <input type="checkbox" ${isChecked} 
+                                       onchange="toggleHabitInModal(${h.habit_id}, this, ${goalId})">
+                                <span>${h.title}</span>
+                            </label>
+                        `;
+                    });
+                    habitListContainer.innerHTML = html;
+                }
+            })
+            .catch(err => console.error("Lỗi tải habit:", err));
+    }
+
+    // ============================================================
+    // 3. LOAD DATA TIMELINE
+    // ============================================================
     const container = document.getElementById('goalLogsContainer');
     if (container) container.innerHTML = '<div class="loading-spinner">Loading timeline...</div>';
 
@@ -205,7 +291,6 @@ function openGoalDetails(goalId, goalTitle, goalProgress, topicColor, createdAt)
         })
         .catch(err => console.error(err));
 }
-
 function closeGoalDetails() {
     const modal = document.getElementById('goalDetailsModal');
     if (modal) modal.classList.add('hidden');
@@ -393,7 +478,7 @@ function openEntryDetail(log) {
 
     document.getElementById('detailEntryMood').innerText = log.mood || 'Feeling good';
     document.getElementById('detailEntryText').innerText = log.content;
-    
+
     // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH
     const mediaColumn = document.querySelector('.entry-split-media');
     const imgTag = document.getElementById('detailEntryImg');
@@ -537,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const gid = document.getElementById('hiddenGoalId').value;
                         const container = document.getElementById('goalLogsContainer');
 
-                        
+
 
                         // 3. Load lại danh sách nhật ký
                         fetch(`api/get_goal_logs.php?goal_id=${gid}`)
@@ -583,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         currentLogData.content = formData.get('content');
                         currentLogData.mood = formData.get('mood');
-                      
+
 
                         toggleEditMode(false);
 
@@ -591,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const gid = document.getElementById('hiddenGoalId').value;
                         const container = document.getElementById('goalLogsContainer');
 
-                        
+
 
                         fetch(`api/get_goal_logs.php?goal_id=${gid}`)
                             .then(r => r.json()).then(d => { if (d.status === 'success') renderGoalLogs(d.data, container); });
@@ -964,4 +1049,42 @@ function toggleHabit(habitId, checkboxElement) {
             }
         })
         .catch(err => console.error("Error:", err));
+}
+// Hàm xử lý khi tick chọn Habit ngay trong Modal Chi tiết
+function toggleHabitInModal(habitId, checkbox, goalId) {
+    const item = document.getElementById(`modal-habit-${habitId}`);
+
+    // 1. Hiệu ứng UI ngay lập tức (Gạch ngang/Đổi màu)
+    if (checkbox.checked) {
+        item.classList.add('done');
+    } else {
+        item.classList.remove('done');
+    }
+
+    // 2. Gọi API để lưu vào database
+    fetch('api/check_habit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `habit_id=${habitId}`
+    }).then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // 3. Cập nhật thanh Progress tròn ở Header ngay lập tức
+                const newPercent = data.new_progress;
+
+                // Cập nhật số % text
+                const textElem = document.getElementById('heroProgressText');
+                if (textElem) textElem.textContent = newPercent + '%';
+
+                // Cập nhật vòng tròn xoay
+                const circlePath = document.getElementById('heroProgressPath');
+                if (circlePath) {
+                    circlePath.style.strokeDasharray = `${newPercent}, 100`;
+                }
+
+                // Cập nhật cả thẻ Goal bên ngoài Dashboard (để khi đóng modal thấy nó đã đổi)
+                updateGoalCardUI(goalId, newPercent);
+            }
+        })
+        .catch(err => console.error("Lỗi update habit:", err));
 }
