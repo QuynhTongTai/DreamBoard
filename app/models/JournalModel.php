@@ -13,25 +13,25 @@ class JournalModel
         $this->conn = $database->connect();
     }
 
-    public function createLog($user_id, $goal_id, $mood, $title, $content, $progress, $image = null)
+    public function createLog($user_id, $goal_id, $mood, $title, $content, $image = null)
     {
+        // Bỏ progress_update khỏi câu SQL
         $query = "INSERT INTO " . $this->table_name . " 
-              (user_id, goal_id, mood, journey_title, content, progress_update, image, created_at) 
-              VALUES (:user_id, :goal_id, :mood, :title, :content, :progress, :image, NOW())";
+              (user_id, goal_id, mood, journey_title, content, image, created_at) 
+              VALUES (:user_id, :goal_id, :mood, :title, :content, :image, NOW())";
 
         $stmt = $this->conn->prepare($query);
 
-        // Làm sạch data
         $content = htmlspecialchars(strip_tags($content));
         $mood = htmlspecialchars(strip_tags($mood));
-        $title = htmlspecialchars(strip_tags($title)); // Mới
+        $title = htmlspecialchars(strip_tags($title));
 
         $stmt->bindParam(':user_id', $user_id);
         $stmt->bindParam(':goal_id', $goal_id);
         $stmt->bindParam(':mood', $mood);
-        $stmt->bindParam(':title', $title); // Mới
+        $stmt->bindParam(':title', $title);
         $stmt->bindParam(':content', $content);
-        $stmt->bindParam(':progress', $progress);
+        // $stmt->bindParam(':progress', $progress); // Xóa dòng này
         $stmt->bindParam(':image', $image);
 
         return $stmt->execute();
@@ -70,15 +70,16 @@ class JournalModel
         return $stmt->execute();
     }
 
-    public function updateLog($log_id, $user_id, $mood, $content, $progress)
+    public function updateLog($log_id, $user_id, $mood, $content)
     {
+        // Bỏ progress_update khỏi câu SQL
         $query = "UPDATE " . $this->table_name . "
-                  SET mood = :mood, content = :content, progress_update = :progress
+                  SET mood = :mood, content = :content
                   WHERE log_id = :log_id AND user_id = :user_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':mood', $mood);
         $stmt->bindParam(':content', $content);
-        $stmt->bindParam(':progress', $progress);
+        // $stmt->bindParam(':progress', $progress); // Xóa dòng này
         $stmt->bindParam(':log_id', $log_id);
         $stmt->bindParam(':user_id', $user_id);
         return $stmt->execute();
@@ -158,9 +159,11 @@ class JournalModel
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
-        
-        if (empty($topic_id) || $topic_id === 'all') $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
-        else $stmt->bindParam(':topic_id', $topic_id);
+
+        if (empty($topic_id) || $topic_id === 'all')
+            $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
+        else
+            $stmt->bindParam(':topic_id', $topic_id);
 
         $stmt->bindValue(':start', !empty($start_date) ? $start_date : null);
         $stmt->bindValue(':end', !empty($end_date) ? $end_date : null);
@@ -354,19 +357,20 @@ class JournalModel
     // ... (Các hàm cũ giữ nguyên) ...
 
     // [MỚI] Lưu kết quả AI vào bài nhật ký
-    public function saveAiReflection($log_id, $analysis, $advice, $quote) {
+    public function saveAiReflection($log_id, $analysis, $advice, $quote)
+    {
         $query = "UPDATE journey_log 
                   SET ai_analysis = :analysis, 
                       ai_advice = :advice, 
                       ai_quote = :quote 
                   WHERE log_id = :log_id";
-        
+
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([
             ':analysis' => $analysis,
-            ':advice'   => $advice,
-            ':quote'    => $quote,
-            ':log_id'   => $log_id
+            ':advice' => $advice,
+            ':quote' => $quote,
+            ':log_id' => $log_id
         ]);
     }
     // --- CÁC HÀM DAILY GARDEN (Thêm vào cuối file) ---
@@ -406,9 +410,9 @@ class JournalModel
             // B1. Đã làm -> Hủy (Uncheck) -> Xóa log
             $del = $this->conn->prepare("DELETE FROM habit_logs WHERE log_id = ?");
             $del->execute([$exists['log_id']]);
-            
+
             // Giảm progress đi 1 chút (ví dụ 2%)
-            if($goal_id) {
+            if ($goal_id) {
                 $this->conn->prepare("UPDATE goals SET progress = GREATEST(0, progress - 2) WHERE goal_id = ?")->execute([$goal_id]);
             }
             return 'unchecked';
@@ -418,11 +422,75 @@ class JournalModel
             $ins->execute([$habit_id, $date]);
 
             // Tăng progress lên 1 chút (ví dụ 2%) - Đây là phần "Tích tiểu thành đại"
-            if($goal_id) {
+            if ($goal_id) {
                 $this->conn->prepare("UPDATE goals SET progress = LEAST(100, progress + 2) WHERE goal_id = ?")->execute([$goal_id]);
             }
             return 'checked';
         }
+    }
+    // Cập nhật Progress dựa trên Habit & Thời gian
+    public function calculateGoalProgress($goal_id)
+    {
+        // 1. Lấy thông tin Goal (Start Date, End Date)
+        $stmtGoal = $this->conn->prepare("SELECT start_date, end_date FROM goals WHERE goal_id = :gid");
+        $stmtGoal->execute([':gid' => $goal_id]);
+        $goal = $stmtGoal->fetch(PDO::FETCH_ASSOC);
+
+        if (!$goal || empty($goal['start_date']) || empty($goal['end_date'])) {
+            return 0; // Không đủ dữ liệu ngày tháng để tính
+        }
+
+        // 2. Tính tổng số ngày (Duration)
+        $start = new DateTime($goal['start_date']);
+        $end = new DateTime($goal['end_date']);
+        // +1 vì nếu start=end thì vẫn tính là 1 ngày
+        $days = $end->diff($start)->days + 1;
+
+        // 3. Đếm số lượng Habit thuộc Goal này
+        $stmtCountHabit = $this->conn->prepare("SELECT COUNT(*) FROM habits WHERE goal_id = :gid");
+        $stmtCountHabit->execute([':gid' => $goal_id]);
+        $totalHabitsPerDay = $stmtCountHabit->fetchColumn();
+
+        if ($totalHabitsPerDay == 0)
+            return 0; // Không có habit nào thì progress = 0
+
+        // 4. Tính Mẫu số (Tổng số tick tối đa có thể đạt được trong suốt quá trình)
+        $maxPossibleTicks = $days * $totalHabitsPerDay;
+
+        // 5. Tính Tử số (Tổng số tick thực tế đã làm được từ bảng logs)
+        // Join bảng habits để chắc chắn chỉ đếm log của goal này
+        $queryActual = "SELECT COUNT(*) FROM habit_logs hl 
+                    JOIN habits h ON hl.habit_id = h.habit_id 
+                    WHERE h.goal_id = :gid";
+        $stmtActual = $this->conn->prepare($queryActual);
+        $stmtActual->execute([':gid' => $goal_id]);
+        $actualTicks = $stmtActual->fetchColumn();
+
+        // 6. Tính phần trăm
+        $progress = 0;
+        if ($maxPossibleTicks > 0) {
+            $progress = ($actualTicks / $maxPossibleTicks) * 100;
+        }
+
+        // Làm tròn (lấy số nguyên hoặc 1 số lẻ)
+        $progress = round($progress);
+
+        // Giới hạn max 100 (phòng trường hợp tick quá ngày end date)
+        if ($progress > 100)
+            $progress = 100;
+
+        // 7. Update vào Database
+        $update = $this->conn->prepare("UPDATE goals SET progress = :p WHERE goal_id = :gid");
+        $update->execute([':p' => $progress, ':gid' => $goal_id]);
+
+        return $progress;
+    }
+    // 1. Lấy Goal ID từ Habit ID
+    public function getGoalIdByHabit($habit_id)
+    {
+        $stmt = $this->conn->prepare("SELECT goal_id FROM habits WHERE habit_id = :hid LIMIT 1");
+        $stmt->execute([':hid' => $habit_id]);
+        return $stmt->fetchColumn(); // Trả về goal_id hoặc false
     }
 }
 ?>

@@ -145,79 +145,62 @@ class JournalController
     public function addJourney()
     {
         header('Content-Type: application/json');
-        if (session_status() == PHP_SESSION_NONE)
-            session_start();
+        if (session_status() == PHP_SESSION_NONE) session_start();
 
         if (empty($_SESSION['user_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             exit;
         }
 
-        // Lấy dữ liệu từ Form
         $user_id = $_SESSION['user_id'];
         $goal_id = $_POST['goal_id'];
         $title   = $_POST['journey_title'] ?? '';
         $content = $_POST['content'] ?? '';
-        $progress = $_POST['progress'] ?? 0;
+        // $progress = $_POST['progress'] ?? 0;  <-- XÓA DÒNG NÀY
 
-        // Xử lý Mood (Mảng checkbox -> chuỗi cách nhau dấu phẩy)
         $mood = isset($_POST['mood']) ? implode(', ', $_POST['mood']) : '';
 
-        // Xử lý Upload Ảnh (Nếu có)
+        // ... (Giữ nguyên đoạn xử lý upload ảnh) ...
         $imagePath = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $target_dir = "../assets/uploads/"; // Thư mục lưu ảnh
-            if (!file_exists($target_dir))
-                mkdir($target_dir, 0777, true);
-
-            // Tạo tên file độc nhất để tránh trùng
-            $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
-            $new_filename = uniqid() . '.' . $file_extension;
-            $target_file = $target_dir . $new_filename;
-
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                // Lưu đường dẫn vào DB (bỏ ../ đi để hiển thị trên web cho đúng)
-                $imagePath = "assets/uploads/" . $new_filename;
-            }
+             // ... Code upload ảnh cũ giữ nguyên ...
+             $target_dir = "../assets/uploads/";
+             if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
+             $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
+             $new_filename = uniqid() . '.' . $file_extension;
+             $target_file = $target_dir . $new_filename;
+             if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                 $imagePath = "assets/uploads/" . $new_filename;
+             }
         }
 
         $model = new JournalModel();
 
-        // 1. Tạo Log mới
-        $created = $model->createLog($user_id, $goal_id, $mood, $title, $content, $progress, $imagePath);
+        // 1. [SỬA] Gọi createLog không truyền progress nữa
+        $created = $model->createLog($user_id, $goal_id, $mood, $title, $content, $imagePath);
 
         if ($created) {
-            // 2. Cập nhật tiến độ Goal (Max Progress)
-            $newMaxProgress = $model->updateGoalProgressToMax($goal_id);
-
-            // --- [PHẦN MỚI] CHECK XEM CÓ THƯ TƯƠNG LAI NÀO ĐANG CHỜ KHÔNG ---
-            // Gọi hàm tìm thư dựa trên mood vừa nhập (Hàm này bạn đã thêm vào JournalModel ở bước trước)
+            // 2. [QUAN TRỌNG] KHÔNG GỌI updateGoalProgressToMax NỮA
+            // Vì progress giờ tính bằng habit, viết nhật ký không làm tăng %
+            
+            // Tìm thư tương lai (Logic cũ giữ nguyên)
             $foundLetter = $model->findPendingLetterByMood($user_id, $mood);
             
-            // Chuẩn bị dữ liệu trả về
             $response = [
                 'status' => 'success',
-                'new_progress' => $newMaxProgress
+                // 'new_progress' => ... // Không trả về new_progress nữa
             ];
 
-            // Nếu tìm thấy thư
             if ($foundLetter) {
-                // Đánh dấu thư đã mở ngay lập tức (để lần sau không hiện lại)
-                // Lưu ý: Kiểm tra cột ID trong database của bạn là 'id' hay 'letter_id' nhé. 
-                // Ở đây mình giả định là 'id'.
                 $letterId = $foundLetter['id'] ?? $foundLetter['letter_id']; 
-               // $model->markLetterAsOpened($letterId); 
-                
-                // Đính kèm nội dung thư vào JSON để JS hiển thị Popup
                 $response['letter_data'] = [
                     'id' => $letterId,
-                    'created_at' => date('F j, Y', strtotime($foundLetter['created_at'])), // Format ngày đẹp: Nov 29, 2023
+                    'created_at' => date('F j, Y', strtotime($foundLetter['created_at'])),
                     'mood' => $foundLetter['mood'],
-                    'message' => $foundLetter['message'], // Nội dung thư
+                    'message' => $foundLetter['message'],
                     'title' => $foundLetter['title'] ?? 'A Message from Your Past Self'
                 ];
             }
-            // ----------------------------------------------------
 
             echo json_encode($response);
         } else {
@@ -225,42 +208,31 @@ class JournalController
         }
         exit;
     }
-    // Thêm vào trong class JournalController
+
     public function updateJourney()
     {
         header('Content-Type: application/json');
-        if (session_status() == PHP_SESSION_NONE)
-            session_start();
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        // ... Check session ...
 
-        if (empty($_SESSION['user_id'])) {
-            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
-            exit;
-        }
-
-        // Lấy và kiểm tra dữ liệu
         $log_id = $_POST['log_id'] ?? 0;
-        $goal_id = $_POST['goal_id'] ?? 0;
+        $goal_id = $_POST['goal_id'] ?? 0; // Vẫn lấy để redirect nếu cần, nhưng ko dùng tính %
         $content = $_POST['content'] ?? '';
         $mood = $_POST['mood'] ?? '';
-        $progress = $_POST['progress'] ?? 0;
+        // $progress = $_POST['progress'] ?? 0; <-- XÓA
         $user_id = $_SESSION['user_id'];
 
-        if (!$log_id || !$goal_id) {
+        if (!$log_id) {
             echo json_encode(['status' => 'error', 'message' => 'Missing ID']);
             exit;
         }
 
         $model = new JournalModel();
 
-        // 1. Cập nhật log
-        if ($model->updateLog($log_id, $user_id, $mood, $content, $progress)) {
-            // 2. Tính lại % Max
-            $newMax = $model->updateGoalProgressToMax($goal_id);
-
-            echo json_encode([
-                'status' => 'success',
-                'new_progress' => $newMax
-            ]);
+        // [SỬA] Gọi updateLog không truyền progress
+        if ($model->updateLog($log_id, $user_id, $mood, $content)) {
+            // Không tính lại % Max nữa
+            echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to update']);
         }

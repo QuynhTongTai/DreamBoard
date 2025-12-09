@@ -166,7 +166,6 @@
                   </div>
 
                   <div class="j-card-actions">
-                    <span class="j-pill-progress">+<?php echo intval($log['progress_update']); ?>%</span>
                     <span class="j-pill-mood"><?php echo htmlspecialchars($log['mood']); ?></span>
                   </div>
 
@@ -224,7 +223,7 @@
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px;">
             <div>
-                <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display'; font-size: 16px;">Today's Routine ☀️</h4>
+                <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display'; font-size: 16px;">Today's Routine </h4>
                 <span style="font-size: 11px; color: #888;">Daily Check-in</span>
             </div>
             <span style="font-size: 12px; font-weight: 600; color: #6b5bff; background: #f3e8ff; padding: 4px 8px; border-radius: 6px;">
@@ -526,16 +525,7 @@
               </button>
             </div>
 
-            <div class="form-group">
-              <div class="progress-label-group">
-                <label class="form-label-styled">New Progress</label>
-                <span id="sliderValue" class="slider-value-badge">0%</span>
-              </div>
-              <div class="range-wrapper">
-                <input type="range" id="progressSlider" name="progress" min="0" max="100" value="0"
-                  class="styled-slider" oninput="document.getElementById('sliderValue').innerText = this.value + '%'">
-              </div>
-            </div>
+            
 
             <div class="form-group">
               <label class="form-label-styled">Attach a photo</label>
@@ -596,9 +586,7 @@
           </div>
 
           <div class="split-footer">
-            <div class="progress-indicator">
-              Progress: <span id="detailEntryProgress">+0%</span>
-            </div>
+            
 
             <div class="action-group">
               <button class="btn-soul-reflect" onclick="callSoulReflection()">
@@ -646,10 +634,7 @@
               <input type="text" name="mood" id="editMoodInput" class="form-input-styled">
             </div>
 
-            <div class="form-group">
-              <label class="form-label-styled">Progress (%)</label>
-              <input type="number" name="progress" id="editProgressInput" class="form-input-styled" min="0" max="100">
-            </div>
+            
 
             <div class="modal-actions">
               <button type="button" class="btn-cancel-panel" onclick="toggleEditMode(false)">Cancel</button>

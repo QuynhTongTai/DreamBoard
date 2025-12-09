@@ -114,7 +114,7 @@ function saveGoal(event) {
     // 3. [QUAN TRỌNG] Lấy TẤT CẢ input thói quen và đưa vào FormData
     // Lưu ý: Selector phải là 'input[name="daily_habits[]"]' (có chữ s và ngoặc vuông)
     const habitInputs = document.querySelectorAll('input[name="daily_habits[]"]');
-    
+
     habitInputs.forEach(input => {
         const val = input.value.trim();
         if (val !== "") {
@@ -251,24 +251,21 @@ function renderGoalLogsNew(logs, container, themeColor) {
         const logData = JSON.stringify(log).replace(/"/g, '&quot;');
 
         html += `
-            <div class="timeline-item-wrapper" style="position:relative; padding-left:20px;">
-                <div class="timeline-dot" style="border-color:${themeColor || '#C6A7FF'}"></div>
-                
-                <div class="timeline-card" onclick="openEntryDetail(${logData})">
-                    ${imgHtml}
-                    <div class="card-content">
-                        <div class="card-header-row">
-                            <div class="card-mood-badge">${log.mood || 'Feeling...'}</div>
-                            <span class="card-progress-pill" style="background:${themeColor || '#C6A7FF'}">
-                                +${parseInt(log.progress_update)}%
-                            </span>
-                        </div>
-                        <h4 class="card-title">${displayTitle}</h4>
-                        <p class="card-desc">${log.content}</p>
+    <div class="timeline-item-wrapper" style="position:relative; padding-left:20px;">
+        <div class="timeline-dot" style="border-color:${themeColor || '#C6A7FF'}"></div>
+        
+        <div class="timeline-card" onclick="openEntryDetail(${logData})">
+            ${imgHtml}
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div class="card-mood-badge">${log.mood || 'Feeling...'}</div>
                     </div>
-                </div>
+                <h4 class="card-title">${displayTitle}</h4>
+                <p class="card-desc">${log.content}</p>
             </div>
-        `;
+        </div>
+    </div>
+`;
     });
 
     html += `</div>`;
@@ -396,8 +393,7 @@ function openEntryDetail(log) {
 
     document.getElementById('detailEntryMood').innerText = log.mood || 'Feeling good';
     document.getElementById('detailEntryText').innerText = log.content;
-    document.getElementById('detailEntryProgress').innerText = '+' + log.progress_update + '%';
-
+    
     // 2. XỬ LÝ ẨN HIỆN CỘT ẢNH
     const mediaColumn = document.querySelector('.entry-split-media');
     const imgTag = document.getElementById('detailEntryImg');
@@ -425,7 +421,6 @@ function openEntryDetail(log) {
     }
     document.getElementById('editContentInput').value = log.content;
     document.getElementById('editMoodInput').value = log.mood;
-    document.getElementById('editProgressInput').value = log.progress_update;
 
     // --- [MỚI] 4. KIỂM TRA & HIỂN THỊ AI REFLECTION ---
     const aiCard = document.getElementById('aiInsightCard');
@@ -542,10 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const gid = document.getElementById('hiddenGoalId').value;
                         const container = document.getElementById('goalLogsContainer');
 
-                        if (data.new_progress !== undefined) {
-                            updateProgressUI(data.new_progress);
-                            updateGoalCardUI(gid, data.new_progress);
-                        }
+                        
 
                         // 3. Load lại danh sách nhật ký
                         fetch(`api/get_goal_logs.php?goal_id=${gid}`)
@@ -588,11 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Update View Mode
                         document.getElementById('detailEntryText').innerText = formData.get('content');
                         document.getElementById('detailEntryMood').innerText = formData.get('mood');
-                        document.getElementById('detailEntryProgress').innerText = formData.get('progress') + '%';
 
                         currentLogData.content = formData.get('content');
                         currentLogData.mood = formData.get('mood');
-                        currentLogData.progress_update = formData.get('progress');
+                      
 
                         toggleEditMode(false);
 
@@ -600,10 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const gid = document.getElementById('hiddenGoalId').value;
                         const container = document.getElementById('goalLogsContainer');
 
-                        if (data.new_progress !== undefined) {
-                            updateProgressUI(data.new_progress);
-                            updateGoalCardUI(gid, data.new_progress);
-                        }
+                        
 
                         fetch(`api/get_goal_logs.php?goal_id=${gid}`)
                             .then(r => r.json()).then(d => { if (d.status === 'success') renderGoalLogs(d.data, container); });
@@ -921,14 +909,14 @@ function resetVoiceButton(btn, textarea) {
 
 function addHabitInput() {
     const container = document.getElementById('habitInputsContainer');
-    
+
     // Tạo thẻ div bọc ngoài
     const div = document.createElement('div');
     div.className = 'habit-row';
     div.style.marginBottom = '10px';
     div.style.display = 'flex'; // Để input và nút xóa nằm ngang
     div.style.gap = '8px';
-    
+
     div.innerHTML = `
         <input type="text" name="daily_habits[]" placeholder="Another habit..." 
                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
@@ -938,39 +926,42 @@ function addHabitInput() {
             <i class="ph-bold ph-trash" style="font-size:18px;"></i>
         </button>
     `;
-    
+
     container.appendChild(div);
 }
 // Xử lý check habit
 // Xử lý check habit (Style To-Do List)
 function toggleHabit(habitId, checkboxElement) {
-    // 1. Lấy trạng thái checked hiện tại (true/false)
+    // 1. HIỆU ỨNG GIAO DIỆN (Làm ngay lập tức để người dùng thấy mượt)
     const isChecked = checkboxElement.checked;
-    
-    // 2. Tìm thẻ cha để thêm/bỏ class gạch ngang chữ
     const todoItem = document.getElementById(`todo-item-${habitId}`);
-    
+
+    // Thêm/Bỏ class gạch ngang chữ
     if (isChecked) {
         todoItem.classList.add('completed');
-        console.log("Habit checked!");
     } else {
         todoItem.classList.remove('completed');
-        console.log("Habit unchecked.");
     }
 
-    // 3. Gọi API cập nhật vào Database
-    // (Logic backend giữ nguyên vì nó chỉ cần biết ID để toggle trạng thái)
+    // 2. GỌI API CẬP NHẬT & TÍNH TOÁN
     fetch('api/check_habit.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `habit_id=${habitId}`
     }).then(res => res.json())
-      .then(data => {
-          if(data.status === 'success') {
-              console.log("Saved: " + data.action);
-              // Nếu muốn update thanh progress của Goal ngay lập tức thì reload trang
-              // setTimeout(() => location.reload(), 500); 
-          }
-      })
-      .catch(err => console.error("Error:", err));
+        .then(data => {
+            if (data.status === 'success') {
+                console.log("Update thành công. Progress mới: " + data.new_progress + "%");
+
+                // 3. [QUAN TRỌNG] RELOAD TRANG ĐỂ CẬP NHẬT THANH TIẾN ĐỘ
+                // Vì bạn tick ở hộp "Today's Routine" bên phải, 
+                // nhưng thanh Progress lại nằm ở Goal Card bên trái.
+                // Reload là cách an toàn nhất để đồng bộ hiển thị % mới.
+
+                setTimeout(() => {
+                    location.reload();
+                }, 500); // Đợi 0.5s để người dùng kịp nhìn thấy dấu tick rồi mới reload
+            }
+        })
+        .catch(err => console.error("Error:", err));
 }
