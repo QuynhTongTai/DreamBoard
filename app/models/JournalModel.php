@@ -38,17 +38,38 @@ class JournalModel
     }
 
     // 2.Hàm LẤY TẤT CẢ NHẬT KÝ CỦA 1 USER (Read)
-    public function getLogsByUserId($user_id)
+    // app/models/JournalModel.php
+
+    // 1. Sửa hàm getLogsByUserId để nhận thêm limit và offset
+    public function getLogsByUserId($user_id, $limit = 10, $offset = 0)
     {
+        // Thêm LIMIT và OFFSET vào câu SQL
         $query = "SELECT j.*, g.title as goal_title, g.topic_id 
-                  FROM " . $this->table_name . " j
-                  LEFT JOIN goals g ON j.goal_id = g.goal_id
-                  WHERE j.user_id = :user_id 
-                  ORDER BY j.created_at DESC";
+              FROM " . $this->table_name . " j
+              LEFT JOIN goals g ON j.goal_id = g.goal_id
+              WHERE j.user_id = :user_id 
+              ORDER BY j.created_at DESC
+              LIMIT :limit OFFSET :offset"; // [MỚI]
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+
+        // [QUAN TRỌNG] Phải bind dạng INT, nếu không MySQL sẽ lỗi
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // 2. Thêm hàm đếm tổng số bài (để biết có bao nhiêu trang)
+    public function countLogsByUserId($user_id)
+    {
+        $query = "SELECT COUNT(*) FROM " . $this->table_name . " WHERE user_id = :user_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchColumn();
     }
     // 3. Hàm LẤY CHI TIẾT 1 BÀI NHẬT KÝ (Để sửa hoặc xem riêng)
     public function getLogById($log_id)

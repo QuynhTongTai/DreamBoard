@@ -1349,3 +1349,37 @@ body {
     color: #00b894; /* Màu xanh thư thái */
     border-color: #b8e9d6;
 }
+/* PAGINATION STYLE */
+.pagination-container {
+    display: flex; justify-content: center; align-items: center; gap: 15px;
+    margin-top: 40px; padding-bottom: 20px;
+}
+.page-btn {
+    display: flex; align-items: center; gap: 5px; padding: 8px 16px;
+    background: #fff; border: 1px solid #eee; border-radius: 20px;
+    text-decoration: none; color: #6b5bff; font-weight: 600; font-size: 14px;
+    transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.page-btn:hover:not(.disabled) {
+    background: #6b5bff; color: white; transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(107, 91, 255, 0.3);
+}
+.page-btn.disabled {
+    color: #ccc; background: #f9f9f9; cursor: not-allowed; border-color: #f0f0f0;
+}
+.page-numbers { display: flex; gap: 8px; }
+.page-num {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; text-decoration: none; color: #555; font-size: 13px; font-weight: 600; transition: 0.2s;
+}
+.page-num:hover { background: #f3e8ff; color: #6b5bff; }
+.page-num.active { background: #6b5bff; color: white; box-shadow: 0 4px 10px rgba(107, 91, 255, 0.3); }
+/* Giúp khi nhảy đến #timeline-start nó sẽ cách mép trên 100px cho thoáng */
+#timeline-start {
+    scroll-margin-top: 100px; 
+}
+
+/* Nếu muốn hiệu ứng cuộn mượt (tùy chọn) */
+html {
+    scroll-behavior: smooth;
+}

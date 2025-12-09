@@ -8,7 +8,8 @@ class JournalController
 {
     public function show()
     {
-        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (session_status() == PHP_SESSION_NONE)
+            session_start();
 
         if (empty($_SESSION['user_id'])) {
             header('Location: login.php');
@@ -16,43 +17,61 @@ class JournalController
         }
 
         $user_id = $_SESSION['user_id'];
-
         $model = new JournalModel();
-        
-        // 1. Lấy dữ liệu Goals & Logs
+
+        // --- [MỚI] XỬ LÝ PHÂN TRANG (PAGINATION) ---
+        // 1. Cấu hình số lượng bài viết mỗi trang
+        $limit = 15; // Bạn có thể sửa thành 10 hoặc 20 tùy ý
+
+        // 2. Lấy trang hiện tại từ URL (ví dụ: journal.php?page=2)
+        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+        if ($page < 1)
+            $page = 1;
+
+        // 3. Tính vị trí bắt đầu (offset) trong database
+        $offset = ($page - 1) * $limit;
+
+        // 4. Tính tổng số trang (để vẽ nút 1, 2, 3... ở View)
+        // Lưu ý: Bạn cần chắc chắn đã thêm hàm countLogsByUserId vào JournalModel như hướng dẫn trước
+        $totalLogs = $model->countLogsByUserId($user_id);
+        $totalPages = ceil($totalLogs / $limit);
+
+        // 5. Lấy danh sách Logs theo trang
+        // Lưu ý: Bạn cần chắc chắn hàm getLogsByUserId trong Model đã nhận tham số limit, offset
+        $logs = $model->getLogsByUserId($user_id, $limit, $offset);
+        // -------------------------------------------
+
+        // 6. Lấy các dữ liệu khác (Giữ nguyên logic cũ)
         $topics = $model->getTopics($user_id);
         $goals = $model->getGoalsByUser($user_id);
-        $logs = $model->getLogsByUserId($user_id);
 
-        // 2. Lấy thông tin Profile & Stats
+        // 7. Lấy thông tin Profile & Stats
         $profile = $this->getUserProfile($user_id);
         $activityStats = $model->getLast7DaysStats($user_id);
 
-        // --- [MỚI] 3. LẤY DANH SÁCH DAILY HABITS ---
-        // Biến $dailyHabits này sẽ được dùng trong journal_view.php để vẽ "Daily Garden"
+        // 8. LẤY DANH SÁCH DAILY HABITS
         $dailyHabits = $model->getDailyHabits($user_id);
-        // -------------------------------------------
 
-        // 4. KIỂM TRA ẢNH PREVIEW VISION BOARD
+        // 9. KIỂM TRA ẢNH PREVIEW VISION BOARD
         $previewDirRelative = "/../../assets/uploads/vision_previews/";
         $previewPathSystem = __DIR__ . $previewDirRelative . "vision_user_" . $user_id . ".png";
-        
+
         $visionPreviewSrc = "assets/uploads/vision_previews/vision_user_" . $user_id . ".png";
-        
+
         if (file_exists($previewPathSystem)) {
             $visionPreviewSrc .= "?v=" . time();
         } else {
-            $visionPreviewSrc = null; 
+            $visionPreviewSrc = null;
         }
 
-        // 5. Render View
+        // 10. Render View
         include __DIR__ . '/../views/layouts/head.php';
         echo '<link rel="stylesheet" href="assets/css/journal.css">';
         include __DIR__ . '/../views/layouts/topbar.php';
 
-        // Các biến $dailyHabits, $goals... sẽ tự động có mặt bên trong file này
+        // Các biến $dailyHabits, $goals, $logs, $page, $totalPages... sẽ tự động có mặt bên trong file này
         include __DIR__ . '/../views/journal_view.php';
-        
+
         echo '<script src="assets/js/journal.js"></script>';
         include __DIR__ . '/../views/layouts/footer.php';
     }
@@ -72,17 +91,18 @@ class JournalController
     public function addGoal()
     {
         // 1. Kiểm tra đăng nhập
-        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (session_status() == PHP_SESSION_NONE)
+            session_start();
         if (empty($_SESSION['user_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             return;
         }
 
         $user_id = $_SESSION['user_id'];
-        
+
         // Lấy dữ liệu cơ bản
         $title = $_POST['title'] ?? '';
-        $topic_name = $_POST['topic_name'] ?? ''; 
+        $topic_name = $_POST['topic_name'] ?? '';
 
         // [MỚI] Lấy thêm dữ liệu Thói quen và Ngày tháng từ form
         $daily_habit = $_POST['daily_habit'] ?? '';
@@ -145,7 +165,8 @@ class JournalController
     public function addJourney()
     {
         header('Content-Type: application/json');
-        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (session_status() == PHP_SESSION_NONE)
+            session_start();
 
         if (empty($_SESSION['user_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
@@ -154,7 +175,7 @@ class JournalController
 
         $user_id = $_SESSION['user_id'];
         $goal_id = $_POST['goal_id'];
-        $title   = $_POST['journey_title'] ?? '';
+        $title = $_POST['journey_title'] ?? '';
         $content = $_POST['content'] ?? '';
         // $progress = $_POST['progress'] ?? 0;  <-- XÓA DÒNG NÀY
 
@@ -163,15 +184,16 @@ class JournalController
         // ... (Giữ nguyên đoạn xử lý upload ảnh) ...
         $imagePath = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-             // ... Code upload ảnh cũ giữ nguyên ...
-             $target_dir = "../assets/uploads/";
-             if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
-             $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
-             $new_filename = uniqid() . '.' . $file_extension;
-             $target_file = $target_dir . $new_filename;
-             if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                 $imagePath = "assets/uploads/" . $new_filename;
-             }
+            // ... Code upload ảnh cũ giữ nguyên ...
+            $target_dir = "../assets/uploads/";
+            if (!file_exists($target_dir))
+                mkdir($target_dir, 0777, true);
+            $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
+            $new_filename = uniqid() . '.' . $file_extension;
+            $target_file = $target_dir . $new_filename;
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                $imagePath = "assets/uploads/" . $new_filename;
+            }
         }
 
         $model = new JournalModel();
@@ -182,17 +204,17 @@ class JournalController
         if ($created) {
             // 2. [QUAN TRỌNG] KHÔNG GỌI updateGoalProgressToMax NỮA
             // Vì progress giờ tính bằng habit, viết nhật ký không làm tăng %
-            
+
             // Tìm thư tương lai (Logic cũ giữ nguyên)
             $foundLetter = $model->findPendingLetterByMood($user_id, $mood);
-            
+
             $response = [
                 'status' => 'success',
                 // 'new_progress' => ... // Không trả về new_progress nữa
             ];
 
             if ($foundLetter) {
-                $letterId = $foundLetter['id'] ?? $foundLetter['letter_id']; 
+                $letterId = $foundLetter['id'] ?? $foundLetter['letter_id'];
                 $response['letter_data'] = [
                     'id' => $letterId,
                     'created_at' => date('F j, Y', strtotime($foundLetter['created_at'])),
@@ -212,7 +234,8 @@ class JournalController
     public function updateJourney()
     {
         header('Content-Type: application/json');
-        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (session_status() == PHP_SESSION_NONE)
+            session_start();
         // ... Check session ...
 
         $log_id = $_POST['log_id'] ?? 0;
@@ -238,7 +261,8 @@ class JournalController
         }
         exit;
     }
-    public function uploadAvatar() {
+    public function uploadAvatar()
+    {
         // Tắt lỗi HTML để trả về JSON sạch
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
@@ -246,8 +270,9 @@ class JournalController
         header('Content-Type: application/json');
 
         try {
-            if (session_status() == PHP_SESSION_NONE) session_start();
-            
+            if (session_status() == PHP_SESSION_NONE)
+                session_start();
+
             if (empty($_SESSION['user_id'])) {
                 throw new Exception('Unauthorized');
             }
@@ -279,11 +304,11 @@ class JournalController
             // 3. Cập nhật Database (Gọi UserModel)
             // Đường dẫn lưu vào DB (tương đối từ thư mục gốc)
             $db_path = "assets/uploads/avatars/" . $new_name;
-            
+
             // Load UserModel
             require_once __DIR__ . '/../models/UserModel.php';
             $userModel = new UserModel();
-            
+
             if ($userModel->updateAvatar($_SESSION['user_id'], $db_path)) {
                 // Cập nhật session
                 $_SESSION['avatar'] = $db_path;
@@ -302,8 +327,9 @@ class JournalController
     {
         // Trả về JSON
         header('Content-Type: application/json');
-        
-        if (session_status() == PHP_SESSION_NONE) session_start();
+
+        if (session_status() == PHP_SESSION_NONE)
+            session_start();
         if (empty($_SESSION['user_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             exit;
@@ -318,7 +344,7 @@ class JournalController
         }
 
         $model = new JournalModel();
-        
+
         // Gọi hàm xóa trong Model
         if ($model->deleteGoal($goal_id, $user_id)) {
             echo json_encode(['status' => 'success']);

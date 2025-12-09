@@ -122,12 +122,11 @@
       </div>
     </div>
     <h4 class="section-title">Journey Timeline</h4>
-
+    <h4 class="section-title" id="timeline-start">Journey Timeline</h4>
     <div class="main-timeline-section">
       <?php if (!empty($logs)): ?>
         <?php
-        // 1. Nhóm các log theo ngày trước khi loop
-        // Kết quả mong muốn: [ 'Dec 04, 2025' => [log1, log2], 'Dec 03' => [log3] ]
+        // 1. Nhóm các log theo ngày
         $groupedLogs = [];
         foreach ($logs as $log) {
           $dateKey = date('M d, Y', strtotime($log['created_at']));
@@ -183,8 +182,38 @@
           <p>No journey entries yet. Start writing your story!</p>
         </div>
       <?php endif; ?>
-    </div>
 
+      <?php if (isset($totalPages) && $totalPages > 1): ?>
+        <div class="pagination-container">
+
+          <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>#timeline-start" class="page-btn prev">
+              <i class="ph-bold ph-caret-left"></i> Prev
+            </a>
+          <?php else: ?>
+            <span class="page-btn disabled"><i class="ph-bold ph-caret-left"></i> Prev</span>
+          <?php endif; ?>
+
+          <div class="page-numbers">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <a href="?page=<?php echo $i; ?>#timeline-start"
+                class="page-num <?php echo ($i == $page) ? 'active' : ''; ?>">
+                <?php echo $i; ?>
+              </a>
+            <?php endfor; ?>
+          </div>
+
+          <?php if ($page < $totalPages): ?>
+            <a href="?page=<?php echo $page + 1; ?>#timeline-start" class="page-btn next">
+              Next <i class="ph-bold ph-caret-right"></i>
+            </a>
+          <?php else: ?>
+            <span class="page-btn disabled">Next <i class="ph-bold ph-caret-right"></i></span>
+          <?php endif; ?>
+
+        </div>
+      <?php endif; ?>
+    </div>
   </section>
 
   <aside class="right-col">
