@@ -24,13 +24,20 @@ try {
     $title = $_POST['title'] ?? '';
     $topic_name = $_POST['topic_name'] ?? '';
 
-    // [MỚI] Lấy thêm dữ liệu Thói quen và Ngày tháng từ Form
-    $daily_habit = $_POST['daily_habit'] ?? '';
-    // Nếu ngày rỗng thì để null, tránh lỗi định dạng Date trong SQL
+    // [CẬP NHẬT QUAN TRỌNG] Lấy mảng habits
+    // Vì bên HTML đặt name="daily_habits[]", nên PHP sẽ nhận được một mảng
+    $daily_habits = $_POST['daily_habits'] ?? []; 
+    
+    // Kiểm tra an toàn: Nếu không phải mảng (lỗi gì đó) thì ép về mảng rỗng
+    if (!is_array($daily_habits)) {
+        $daily_habits = [];
+    }
+
+    // Lấy ngày tháng
     $start_date = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
     $end_date = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
 
-    // 3. Validate
+    // 3. Validate Title
     if (trim($title) === '') {
         throw new Exception('Goal title is required');
     }
@@ -41,12 +48,12 @@ try {
     // Tìm hoặc tạo Topic
     $topic_id = $model->getOrCreateTopic($user_id, $topic_name);
 
-    // [CẬP NHẬT] Gọi hàm addGoal với đầy đủ 6 tham số (để khớp với bên Model vừa sửa)
-    // Thứ tự: ($user_id, $title, $topic_id, $habit_title, $start_date, $end_date)
-    $result = $model->addGoal($user_id, $title, $topic_id, $daily_habit, $start_date, $end_date);
+    // [CẬP NHẬT] Truyền mảng $daily_habits vào hàm addGoal
+    // (Bên JournalModel bạn đã sửa để nhận array rồi nên ở đây truyền array là đúng)
+    $result = $model->addGoal($user_id, $title, $topic_id, $daily_habits, $start_date, $end_date);
 
     if ($result) {
-        // Trả về success đơn giản
+        // Trả về success
         echo json_encode(['status' => 'success']);
     } else {
         throw new Exception('Database error');

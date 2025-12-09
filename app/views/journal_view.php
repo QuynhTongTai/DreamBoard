@@ -220,6 +220,42 @@
         </div>
       </div>
     </div>
+    <div class="side-box" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px;">
+            <div>
+                <h4 style="margin: 0; color: #3b2b7a; font-family: 'Playfair Display'; font-size: 16px;">Today's Routine ☀️</h4>
+                <span style="font-size: 11px; color: #888;">Daily Check-in</span>
+            </div>
+            <span style="font-size: 12px; font-weight: 600; color: #6b5bff; background: #f3e8ff; padding: 4px 8px; border-radius: 6px;">
+                <?php echo date('M d'); ?>
+            </span>
+        </div>
+
+        <?php if (!empty($dailyHabits)): ?>
+            <div class="habit-list">
+                <?php foreach ($dailyHabits as $h): ?>
+                    <div class="todo-item <?php echo $h['is_done'] ? 'completed' : ''; ?>" id="todo-item-<?php echo $h['habit_id']; ?>">
+                        <label class="todo-label">
+                            <input type="checkbox" class="todo-checkbox" 
+                                   <?php echo $h['is_done'] ? 'checked' : ''; ?>
+                                   onchange="toggleHabit(<?php echo $h['habit_id']; ?>, this)">
+                            
+                            <div class="todo-content">
+                                <span class="todo-text"><?php echo htmlspecialchars($h['title']); ?></span>
+                                <small class="todo-sub"><?php echo htmlspecialchars($h['goal_title']); ?></small>
+                            </div>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div style="text-align:center; padding: 20px 0; color: #999;">
+                <i class="ph ph-coffee" style="font-size: 24px; margin-bottom: 5px; display:block;"></i>
+                <span style="font-size: 12px;">No routines set for today.<br>Relax & Enjoy!</span>
+            </div>
+        <?php endif; ?>
+    </div>
     <div class="side-box"
       style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--shadow);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
@@ -302,10 +338,23 @@
 
       </div>
       <div class="form-group" style="margin-top: 15px;">
-        <label style="display:block; margin-bottom:8px; font-weight:500;">Daily Ritual (Daily Habit)</label>
-        <input type="text" name="daily_habit" placeholder="e.g. Read 5 pages, Drink water..."
-          style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <small style="color:#888; font-size:12px;">A small action you commit to do every day for this goal.</small>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="font-weight:500;">Daily Rituals (Daily Habits)</label>
+
+          <button type="button" onclick="addHabitInput()"
+            style="border:none; background:none; color:#6b5bff; cursor:pointer; font-weight:600; font-size:13px;">
+            <i class="ph-bold ph-plus-circle"></i> Add More
+          </button>
+        </div>
+
+        <div id="habitInputsContainer">
+          <div class="habit-row" style="margin-bottom:10px;">
+            <input type="text" name="daily_habits[]" placeholder="e.g. Read 5 pages..."
+              style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+          </div>
+        </div>
+
+        <small style="color:#888; font-size:12px;">Small actions you commit to do every day.</small>
       </div>
 
       <div class="form-group" style="margin-top: 15px; display: flex; gap: 10px;">

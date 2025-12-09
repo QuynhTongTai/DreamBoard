@@ -146,43 +146,46 @@ class JournalModel
     // File: app/models/JournalModel.php
 
     // Sửa lại hàm addGoal để nhận thêm habit, start_date, end_date
-    public function addGoal($user_id, $title, $topic_id, $habit_title = null, $start_date = null, $end_date = null)
+    // File: app/models/JournalModel.php
+
+    // [CẬP NHẬT] Tham số $habit_titles bây giờ nhận vào là Mảng (array)
+    public function addGoal($user_id, $title, $topic_id, $habit_titles = [], $start_date = null, $end_date = null)
     {
-        // 1. INSERT VÀO BẢNG GOALS (Lưu thông tin chung + ngày tháng)
+        // 1. INSERT GOAL (Giữ nguyên)
         $query = "INSERT INTO goals (user_id, title, topic_id, progress, start_date, end_date, created_at) 
                   VALUES (:uid, :title, :topic_id, 0, :start, :end, NOW())";
 
         $stmt = $this->conn->prepare($query);
-
         $stmt->bindParam(':uid', $user_id);
         $stmt->bindParam(':title', $title);
+        
+        if (empty($topic_id) || $topic_id === 'all') $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
+        else $stmt->bindParam(':topic_id', $topic_id);
 
-        // Xử lý Topic ID (Giữ nguyên logic cũ)
-        if (empty($topic_id) || $topic_id === 'all') {
-            $stmt->bindValue(':topic_id', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':topic_id', $topic_id);
-        }
-
-        // Xử lý Date: Nếu rỗng thì lưu NULL vào Database
         $stmt->bindValue(':start', !empty($start_date) ? $start_date : null);
         $stmt->bindValue(':end', !empty($end_date) ? $end_date : null);
 
         if ($stmt->execute()) {
-            // Lấy ID của Goal vừa tạo ra
             $goal_id = $this->conn->lastInsertId();
 
-            // 2. INSERT VÀO BẢNG HABITS (Nếu người dùng có nhập thói quen)
-            if (!empty($habit_title)) {
-                $queryHabit = "INSERT INTO habits (goal_id, user_id, title, created_at) 
-                               VALUES (:gid, :uid, :title, NOW())";
-                
-                $stmtHabit = $this->conn->prepare($queryHabit);
-                $stmtHabit->execute([
-                    ':gid' => $goal_id,
-                    ':uid' => $user_id,
-                    ':title' => $habit_title
-                ]);
+            // 2. [CẬP NHẬT] Vòng lặp INSERT HABITS
+            // Kiểm tra nếu có danh sách thói quen thì mới lưu
+            if (!empty($habit_titles) && is_array($habit_titles)) {
+                $sqlHabit = "INSERT INTO habits (goal_id, user_id, title, created_at) 
+                             VALUES (:gid, :uid, :title, NOW())";
+                $stmtH = $this->conn->prepare($sqlHabit);
+
+                foreach ($habit_titles as $habit_name) {
+                    $habit_name = trim($habit_name);
+                    // Chỉ lưu nếu tên thói quen không bị rỗng
+                    if (!empty($habit_name)) {
+                        $stmtH->execute([
+                            ':gid' => $goal_id,
+                            ':uid' => $user_id,
+                            ':title' => $habit_name
+                        ]);
+                    }
+                }
             }
 
             return $goal_id;
@@ -365,6 +368,61 @@ class JournalModel
             ':quote'    => $quote,
             ':log_id'   => $log_id
         ]);
+    }
+    // --- CÁC HÀM DAILY GARDEN (Thêm vào cuối file) ---
+
+    // 1. Lấy danh sách Habit của User + Trạng thái hôm nay
+    public function getDailyHabits($user_id)
+    {
+        $today = date('Y-m-d');
+        // Join với bảng logs để xem hôm nay (check_date = $today) đã có dữ liệu chưa
+        // Nếu log_id khác null tức là đã làm (is_done = 1)
+        $query = "SELECT h.*, g.title as goal_title, hl.log_id as is_done
+                  FROM habits h
+                  JOIN goals g ON h.goal_id = g.goal_id
+                  LEFT JOIN habit_logs hl ON h.habit_id = hl.habit_id AND hl.check_date = :today
+                  WHERE h.user_id = :uid 
+                  ORDER BY h.created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':uid' => $user_id, ':today' => $today]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // 2. Check/Uncheck Habit & Tăng Progress
+    public function toggleHabit($habit_id, $date)
+    {
+        // A. Kiểm tra xem đã làm chưa
+        $check = $this->conn->prepare("SELECT log_id FROM habit_logs WHERE habit_id = ? AND check_date = ?");
+        $check->execute([$habit_id, $date]);
+        $exists = $check->fetch();
+
+        // Lấy goal_id để update progress
+        $getGoal = $this->conn->prepare("SELECT goal_id FROM habits WHERE habit_id = ?");
+        $getGoal->execute([$habit_id]);
+        $goal_id = $getGoal->fetchColumn();
+
+        if ($exists) {
+            // B1. Đã làm -> Hủy (Uncheck) -> Xóa log
+            $del = $this->conn->prepare("DELETE FROM habit_logs WHERE log_id = ?");
+            $del->execute([$exists['log_id']]);
+            
+            // Giảm progress đi 1 chút (ví dụ 2%)
+            if($goal_id) {
+                $this->conn->prepare("UPDATE goals SET progress = GREATEST(0, progress - 2) WHERE goal_id = ?")->execute([$goal_id]);
+            }
+            return 'unchecked';
+        } else {
+            // B2. Chưa làm -> Check -> Thêm log
+            $ins = $this->conn->prepare("INSERT INTO habit_logs (habit_id, check_date) VALUES (?, ?)");
+            $ins->execute([$habit_id, $date]);
+
+            // Tăng progress lên 1 chút (ví dụ 2%) - Đây là phần "Tích tiểu thành đại"
+            if($goal_id) {
+                $this->conn->prepare("UPDATE goals SET progress = LEAST(100, progress + 2) WHERE goal_id = ?")->execute([$goal_id]);
+            }
+            return 'checked';
+        }
     }
 }
 ?>

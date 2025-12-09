@@ -77,6 +77,7 @@ function closeModal() {
 }
 
 // --- HÀM SAVE GOAL (ĐÃ LÀM SẠCH & TỐI ƯU) ---
+// --- HÀM SAVE GOAL (ĐÃ CẬP NHẬT HỖ TRỢ NHIỀU HABIT) ---
 function saveGoal(event) {
     if (event) event.preventDefault();
 
@@ -99,32 +100,39 @@ function saveGoal(event) {
         btn.disabled = true;
     }
 
-    // --- SỬA LẠI ĐOẠN NÀY ---
-    // 1. Lấy thêm các thẻ input từ HTML (dựa vào name hoặc querySelector)
-    const habitInput = document.querySelector('input[name="daily_habit"]');
-    const startDateInput = document.querySelector('input[name="start_date"]');
-    const endDateInput = document.querySelector('input[name="end_date"]');
-
-    // 2. Sử dụng FormData để gửi dữ liệu
+    // 1. Khởi tạo FormData và thêm thông tin cơ bản
     const formData = new FormData();
     formData.append('title', title);
     formData.append('topic_name', topicName);
 
-    // 3. Append thêm Habit và Date (nếu có)
-    formData.append('daily_habit', habitInput ? habitInput.value.trim() : '');
+    // 2. Lấy dữ liệu ngày tháng
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
     formData.append('start_date', startDateInput ? startDateInput.value : '');
     formData.append('end_date', endDateInput ? endDateInput.value : '');
 
-    // Lưu ý: Đường dẫn API giữ nguyên như lúc fix lỗi
-    fetch("/DreamBoard/api/add_goal.php", {
+    // 3. [QUAN TRỌNG] Lấy TẤT CẢ input thói quen và đưa vào FormData
+    // Lưu ý: Selector phải là 'input[name="daily_habits[]"]' (có chữ s và ngoặc vuông)
+    const habitInputs = document.querySelectorAll('input[name="daily_habits[]"]');
+    
+    habitInputs.forEach(input => {
+        const val = input.value.trim();
+        if (val !== "") {
+            // Key gửi đi phải là 'daily_habits[]' để PHP nhận được dạng mảng
+            formData.append('daily_habits[]', val);
+        }
+    });
+
+    // 4. Gửi dữ liệu đi
+    fetch("/DreamBoard/api/add_goal.php", { // Kiểm tra lại đường dẫn này nếu cần
         method: "POST",
-        body: formData // Không cần set header Content-Type thủ công khi dùng FormData
+        body: formData
     })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
                 closeModal();
-                location.reload(); // Reload để hiện Goal mới
+                location.reload(); // Reload trang để hiện Goal và Habits mới
             } else {
                 alert(data.message || "Error creating goal");
                 if (btn) {
@@ -908,4 +916,61 @@ function resetVoiceButton(btn, textarea) {
     if (textarea) {
         textarea.placeholder = "Write down your thoughts...";
     }
+}
+// assets/js/journal.js (Thêm vào cuối file)
+
+function addHabitInput() {
+    const container = document.getElementById('habitInputsContainer');
+    
+    // Tạo thẻ div bọc ngoài
+    const div = document.createElement('div');
+    div.className = 'habit-row';
+    div.style.marginBottom = '10px';
+    div.style.display = 'flex'; // Để input và nút xóa nằm ngang
+    div.style.gap = '8px';
+    
+    div.innerHTML = `
+        <input type="text" name="daily_habits[]" placeholder="Another habit..." 
+               style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        
+        <button type="button" onclick="this.parentElement.remove()" 
+                style="border:none; background:none; color:#ff4757; cursor:pointer; padding:0 5px;">
+            <i class="ph-bold ph-trash" style="font-size:18px;"></i>
+        </button>
+    `;
+    
+    container.appendChild(div);
+}
+// Xử lý check habit
+// Xử lý check habit (Style To-Do List)
+function toggleHabit(habitId, checkboxElement) {
+    // 1. Lấy trạng thái checked hiện tại (true/false)
+    const isChecked = checkboxElement.checked;
+    
+    // 2. Tìm thẻ cha để thêm/bỏ class gạch ngang chữ
+    const todoItem = document.getElementById(`todo-item-${habitId}`);
+    
+    if (isChecked) {
+        todoItem.classList.add('completed');
+        console.log("Habit checked!");
+    } else {
+        todoItem.classList.remove('completed');
+        console.log("Habit unchecked.");
+    }
+
+    // 3. Gọi API cập nhật vào Database
+    // (Logic backend giữ nguyên vì nó chỉ cần biết ID để toggle trạng thái)
+    fetch('api/check_habit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `habit_id=${habitId}`
+    }).then(res => res.json())
+      .then(data => {
+          if(data.status === 'success') {
+              console.log("Saved: " + data.action);
+              // Nếu muốn update thanh progress của Goal ngay lập tức thì reload trang
+              // setTimeout(() => location.reload(), 500); 
+          }
+      })
+      .catch(err => console.error("Error:", err));
 }

@@ -28,32 +28,29 @@ class JournalController
         $profile = $this->getUserProfile($user_id);
         $activityStats = $model->getLast7DaysStats($user_id);
 
-        // --- 3. LOGIC MỚI: KIỂM TRA ẢNH PREVIEW VISION BOARD ---
-        
-        // Đường dẫn file hệ thống (để kiểm tra file_exists)
-        // __DIR__ là thư mục app/controllers, cần đi lùi 2 cấp (../../) để ra root
+        // --- [MỚI] 3. LẤY DANH SÁCH DAILY HABITS ---
+        // Biến $dailyHabits này sẽ được dùng trong journal_view.php để vẽ "Daily Garden"
+        $dailyHabits = $model->getDailyHabits($user_id);
+        // -------------------------------------------
+
+        // 4. KIỂM TRA ẢNH PREVIEW VISION BOARD
         $previewDirRelative = "/../../assets/uploads/vision_previews/";
         $previewPathSystem = __DIR__ . $previewDirRelative . "vision_user_" . $user_id . ".png";
         
-        // Đường dẫn URL (để hiển thị trên thẻ img src)
         $visionPreviewSrc = "assets/uploads/vision_previews/vision_user_" . $user_id . ".png";
         
-        // Kiểm tra xem file có thật sự tồn tại không
         if (file_exists($previewPathSystem)) {
-            // Thêm tham số time() để tránh cache (giúp ảnh cập nhật ngay khi vừa Save bên kia)
             $visionPreviewSrc .= "?v=" . time();
         } else {
-            // Nếu chưa có ảnh thì gán null
             $visionPreviewSrc = null; 
         }
-        // -------------------------------------------------------
 
-        // 4. Render View
+        // 5. Render View
         include __DIR__ . '/../views/layouts/head.php';
         echo '<link rel="stylesheet" href="assets/css/journal.css">';
         include __DIR__ . '/../views/layouts/topbar.php';
 
-        // Biến $visionPreviewSrc sẽ được dùng bên trong journal_view.php
+        // Các biến $dailyHabits, $goals... sẽ tự động có mặt bên trong file này
         include __DIR__ . '/../views/journal_view.php';
         
         echo '<script src="assets/js/journal.js"></script>';

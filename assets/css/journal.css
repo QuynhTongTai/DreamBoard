@@ -1191,3 +1191,61 @@ body {
     color: #ff4757 !important;
     text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
 }
+/* --- TO-DO LIST STYLE --- */
+.habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.todo-item {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee; /* Đường gạch mờ ngăn cách các dòng */
+    transition: all 0.3s ease;
+}
+
+/* Label bao quanh để bấm vào chữ cũng check được checkbox */
+.todo-label {
+    display: flex;
+    align-items: flex-start; /* Căn lề trên để checkbox thẳng hàng với dòng đầu */
+    gap: 12px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Style cho checkbox to hơn 1 chút và đổi màu tím */
+.todo-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #6b5bff; /* Màu tím chủ đạo của web bạn */
+    margin-top: 3px; /* Căn chỉnh cho khớp với dòng chữ */
+    cursor: pointer;
+}
+
+.todo-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-text {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: color 0.3s;
+}
+
+.todo-sub {
+    font-size: 11px;
+    color: #aaa;
+}
+
+/* --- TRẠNG THÁI KHI HOÀN THÀNH (Check xong) --- */
+.todo-item.completed .todo-text {
+    text-decoration: line-through; /* Gạch ngang chữ */
+    color: #999; /* Làm mờ chữ */
+}
+
+.todo-item.completed .todo-sub {
+    color: #ccc;
+}
