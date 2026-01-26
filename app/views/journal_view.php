@@ -87,7 +87,6 @@
               <h4><?php echo htmlspecialchars($g['title']); ?></h4>
               <span class="topic-tag"><?php echo htmlspecialchars($g['topic_name'] ?? 'General'); ?></span>
             </div>
-
             <div class="circular-progress" style="--p:<?php echo $percent; ?>;">
               <div class="inner-circle"></div>
               <span class="progress-value"><?php echo $percent; ?>%</span>
@@ -121,7 +120,6 @@
         <?php endif; ?>
       </div>
     </div>
-    <h4 class="section-title">Journey Timeline</h4>
     <h4 class="section-title" id="timeline-start">Journey Timeline</h4>
     <div class="main-timeline-section">
       <?php if (!empty($logs)): ?>

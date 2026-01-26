@@ -21,7 +21,7 @@ class JournalController
 
         // --- [MỚI] XỬ LÝ PHÂN TRANG (PAGINATION) ---
         // 1. Cấu hình số lượng bài viết mỗi trang
-        $limit = 15; // Bạn có thể sửa thành 10 hoặc 20 tùy ý
+        $limit = 15; 
 
         // 2. Lấy trang hiện tại từ URL (ví dụ: journal.php?page=2)
         $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;

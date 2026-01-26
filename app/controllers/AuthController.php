@@ -180,8 +180,8 @@ class AuthController
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'dreamboard47@gmail.com'; // <--- Email của bạn
-            $mail->Password = 'ccgc vgvq dbzu wqjx';    // <--- App Password của bạn
+            $mail->Username = 'qtong4969@gmail.com'; // <--- Email của bạn
+            $mail->Password = 'mynd zeco tvoa vzow';    // <--- App Password của bạn
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
             $mail->CharSet = 'UTF-8';

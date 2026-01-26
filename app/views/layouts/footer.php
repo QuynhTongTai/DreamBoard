@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(checkMailAutomatic, 3000);
     
     // 2. Lặp lại mỗi 15 giây (Để demo cho nhanh, thực tế có thể để 60s)
-    setInterval(checkMailAutomatic, 15000); 
+    setInterval(checkMailAutomatic, 3000); 
 });
 </script>
 

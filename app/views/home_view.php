@@ -88,7 +88,6 @@
           <p>Track progress & celebrate.</p>
         </div>
       </div>
-
       <div class="final-cta">
         <p>Ready to start?</p>
         <button class="btn-primary-lg" onclick="goToRegister()">Create your account</button>
